@@ -24,6 +24,9 @@ try {
   console.warn("Firebase not initialized. Running in local mode.");
 }
 
+// 🔒 CHANGE THIS TO YOUR CLINIC'S SECRET SUPERVISOR PIN 🔒
+const SUPERVISOR_ACCESS_PIN = "2790";
+
 // --- MOCK DATA ---
 const TRAINING_MODULES = [
   {
@@ -323,7 +326,7 @@ const TRAINING_MODULES = [
       • **Type I & II:** Fair/light skin, light eyes. Highly sun-sensitive, always burns, never or rarely tans. (Generally safe for 755nm Alexandrite).
       • **Type III:** Olive skin, dark hair, Mediterranean background. Sometimes burns but tans evenly. (Safe for Alexandrite or a Blend).
       • **Type IV (Olive / Hispanic / Asian):** Medium brown skin. *Provider Trap!* Many patients of East Asian descent appear very fair and might classify themselves as a Type II. However, Asian skin has highly reactive melanocytes. Even if they look pale, you MUST treat them cautiously (often as a Type IV) because they are highly prone to Post-Inflammatory Hyperpigmentation (PIH) from laser heat.
-      • **Type V & VI (Brown to Black):** Deep brown to black skin, Afro-Caribbean or African background. Sun-insensitive, never burns. Abundant epidermal melanin. **You must rely heavily or entirely on Nd:YAG (1064nm)** to bypass the epidermis and prevent severe burns or permanent hypopigmentation. The 1064 nm Nd:YAG laser is the preferred and safest choice for darker skin tones.
+      • **Type V & VI (Brown to Black):** Deep brown to black skin, Afro-Caribbean or African background (e.g., Will Smith). Sun-insensitive, never burns. Abundant epidermal melanin. **You must rely heavily or entirely on Nd:YAG (1064nm)** to bypass the epidermis and prevent severe burns or permanent hypopigmentation. The 1064 nm Nd:YAG laser is the preferred and safest choice for darker skin tones.
 
       **Consultation, Patch Testing & Scheduling**
       A thorough consultation and patch test are critical. The patch test involves marking a small area (approx. 3 × 5 cm) and applying the laser. If no negative reaction occurs, the first full treatment can proceed. Treatments are usually spaced about six weeks apart, typically requiring six to twelve sessions for optimal 80-90% reduction. This offers long-term cost and time savings compared to the temporary results of waxing and shaving.
@@ -624,7 +627,7 @@ const TRAINING_MODULES = [
       • **Hypopigmentation (White Spots):** These occur when the laser causes thermal damage to the skin’s melanin-producing cells, disrupting the natural pigment balance. It is most directly associated with *laser settings that are too high*. It can also be caused by treating recently tanned skin or highly sensitive skin. *Prevention:* Ensure proper skin preparation, choose a qualified practitioner to select correct settings, follow strict aftercare, and carefully monitor the skin.
       • **Hyperpigmentation (PIH):** Darkening of the skin due to thermal damage. More common in darker skin types or tanned skin.
       • **Milia:** Small white cysts can occasionally form post-treatment as the skin heals. These can be managed with gentle exfoliation (like topical glycolic acid) or manual extraction.
-      • **Paradoxical Hypertrichosis:** The stimulation of *new* terminal hair growth. Usually happens on the face/neck of female patients with underlying hormonal conditions when sub-lethal (too low) fluences are used, effectively "warming" and stimulating the follicle instead of destroying it.
+      • **Paradoxical Hypertrichosis:** The stimulation of *new* terminal hair growth. Usually happens on the face/neck of female patients with underlying hormonal conditions when sub-lethal (too low) fluences are used, effectively "warming" and stimulating the follicle instead of destroying it. *Warning:* Treating areas with fine, vellus hair ("peach fuzz") can also inadvertently stimulate those hairs to become thick, terminal hairs.
 
       **Emergency Protocol: What to do if a burn occurs**
       If a patient complains of severe, lingering pain, or you visually notice extreme frosting, blistering, or skin lifting:
@@ -693,7 +696,7 @@ const TRAINING_MODULES = [
       
       *Pro Provider Tips for Post-Care:*
       • **The "Shedding" Phase:** About 1 to 3 weeks after treatment, the destroyed hairs will push their way out of the skin. It looks like new hair growth, but it's actually dead hair shedding! *Important Note:* Not everyone sheds dramatically after every single session. Especially toward the endpoint of their LHR journey, when the remaining hair is much finer and sparser, shedding might be completely unnoticeable. If a patient questions why they haven't shed, reassure them that this is a normal sign of progress.
-      • **Gentle Exfoliation:** Once the redness subsides (usually after 3-5 days), gently exfoliate the area in the shower with a washcloth to help the dead hairs shed and prevent ingrowns. 
+      • **Gentle Exfoliation:** Once the redness subsides (usually after 3-5 days), gently exfoliate the area in the shower with a washcloth or shower glove to help the dead hairs shed and prevent ingrowns. 
       • **Loose Clothing:** Wear loose cotton clothing to your appointment and for a day after to prevent friction irritation on the treated skin.
 
       **Why Spacing Sessions Correctly Matters**
@@ -763,7 +766,8 @@ const CERTIFICATIONS = [
       { id: 'lhr-p8', label: 'Observed and Performed Proper Cleaning & Sanitization of Handpiece / Optics' },
       { id: 'lhr-p9', label: 'Observed and Performed Pre-Treatment Contraindication Screening' },
       { id: 'lhr-p10', label: 'Observed and Performed Proper Treatment Area Lining/Marking' },
-      { id: 'lhr-p11', label: 'Observed and Performed Post-Care Education Prior to Client Departure' }
+      { id: 'lhr-p11', label: 'Observed and Performed Post-Care Education Prior to Client Departure' },
+      { id: 'lhr-p12', label: 'Observed and Performed 2 Full Arm Treatments' }
     ]
   },
   {
@@ -802,6 +806,7 @@ export default function App() {
   const [answers, setAnswers] = useState({});
   const [quizState, setQuizState] = useState({ submitted: false, passed: false });
   const [quizError, setQuizError] = useState('');
+  const [loginError, setLoginError] = useState(''); // NEW: Tracks login errors
   
   // Data State
   const [studentData, setStudentData] = useState({ theoreticalProgress: {}, practicalChecklist: {}, signoffs: {}, quizPerformance: {} });
@@ -889,6 +894,16 @@ export default function App() {
     const nameInput = e.target.elements.name.value.trim();
     if (!nameInput) return;
     
+    // NEW: Supervisor PIN Verification
+    if (role === 'supervisor') {
+      const pinInput = e.target.elements.pin.value;
+      if (pinInput !== SUPERVISOR_ACCESS_PIN) {
+        setLoginError('Incorrect Supervisor Access PIN.');
+        return;
+      }
+    }
+    
+    setLoginError(''); // Clear any previous errors
     setCurrentUser({ name: nameInput, role });
     setAppState(role === 'student' ? 'student-dash' : 'supervisor-dash');
     window.scrollTo(0, 0);
@@ -897,6 +912,7 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setStudentData({ theoreticalProgress: {}, practicalChecklist: {}, signoffs: {}, quizPerformance: {} });
+    setLoginError('');
     setAppState('login');
   };
 
@@ -1048,9 +1064,18 @@ export default function App() {
         <form onSubmit={(e) => handleLogin(e, 'supervisor')} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-stone-700 mb-1">Clinical Supervisor Login</label>
-            <input required type="text" name="name" placeholder="Enter your full name..." className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-colors" />
+            <input required type="text" name="name" placeholder="Enter your full name..." className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-colors mb-3" />
+            
+            <label className="block text-sm font-semibold text-stone-700 mb-1">Access PIN</label>
+            <input required type="password" name="pin" placeholder="Enter supervisor PIN..." className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-colors" />
+            
+            {loginError && (
+              <p className="text-rose-600 text-sm font-semibold mt-2 flex items-center gap-1">
+                <AlertTriangle className="w-4 h-4" /> {loginError}
+              </p>
+            )}
           </div>
-          <button type="submit" className="w-full bg-stone-900 hover:bg-black text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+          <button type="submit" className="w-full bg-stone-900 hover:bg-black text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors mt-2">
             <ShieldCheck className="w-5 h-5"/> Login as Supervisor
           </button>
         </form>
