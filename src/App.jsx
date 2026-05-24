@@ -771,6 +771,271 @@ const CERTIFICATIONS = [
     ]
   },
   {
+    id: 'tattoo',
+    title: 'Laser Tattoo Removal (M22)',
+    modules: [
+      {
+        id: 'tat-1',
+        title: "The Nature of Ink & The Photoacoustic Effect",
+        icon: <Zap className="w-6 h-6 text-amber-900" />,
+        description: "Understanding how ink gets trapped in macrophages and how to shatter it.",
+        content: `
+          **The Nature of Tattoo Ink**
+          Tattoos are made of incredibly tiny ink particles—often around 40 to 100 nanometers in size. When injected into the skin, these particles are attracted to each other and form massive clumps. While the body's immune system can clear tiny particles, it cannot remove these large clumps. The body then encapsulates the clumps within *dermal macrophages* (essentially acting as prison cells, holding the ink particles in place).
+
+          **The Macrophage Steam Explosion**
+          Because these particles are so tiny, they lose heat extremely quickly (short thermal relaxation time). When you hit them with a laser, the particles absorb energy and heat up, passing that heat to the surrounding tissue water inside the macrophage. 
+          When water turns to steam, its volume expands massively (by a factor of about 2,000). The macrophage cannot withstand the pressure from this steam formation, causing it to explode! The explosive force sends the ink particles flying out in all directions, turning them into microscopic fragments that the lymphatic system can now easily wash away. This is the **photoacoustic effect**.
+
+          **Why Pulse Duration Matters**
+          If your laser pulse is too long (like a **millisecond** laser), the ink particles lose too much heat before the temperature rises enough to create steam. The process is too gentle, heat is lost as fast as it comes in, and no explosion occurs. 
+          That is why we absolutely cannot use millisecond lasers for tattoo removal. You must deliver energy in an incredibly short burst to achieve the temperature rise needed for a steam explosion.
+
+          **The Top-Hat Beam Profile**
+          The M22 QS Nd:YAG uses a "top-hat" beam profile. Unlike standard beams that have a "hot spot" in the center, the top-hat profile warrants a perfectly homogenous energy distribution across the entire spot. As a result, it highly minimizes epidermal damage, tissue textural changes, and the occurrence of scarring. It also decreases bleeding and tissue splatter.
+        `,
+        questions: [
+          {
+            id: 'tat-1-1',
+            text: "What happens when laser energy rapidly heats the ink particles inside a macrophage?",
+            options: [
+              "The ink particles chemically react with the laser and dissolve.",
+              "The heat turns the surrounding water into steam, causing the macrophage to explode.",
+              "The macrophage absorbs the laser energy and becomes transparent.",
+              "The heat causes the ink particles to shrink and be absorbed by the body."
+            ],
+            correctIndex: 1,
+            explanation: "When laser energy heats the tiny ink particles, the surrounding water inside the macrophage instantly turns to steam, causing a pressure explosion that shatters the ink clump."
+          },
+          {
+            id: 'tat-1-2',
+            text: "Millisecond pulse durations are effective for tattoo removal.",
+            options: ["True", "False"],
+            correctIndex: 1,
+            explanation: "False! Millisecond pulses are far too long. The heat dissipates before steam can form, meaning no explosive (photoacoustic) reaction occurs to shatter the ink."
+          }
+        ]
+      },
+      {
+        id: 'tat-2',
+        title: "The Four Physical Variables",
+        icon: <Activity className="w-6 h-6 text-black" />,
+        description: "Mastering Fluence, Spot Size, Irradiance, and Repetition Rate to safely break down ink.",
+        content: `
+          **Understanding the Variables**
+          Every laser treatment comes down to a few physical variables. These aren’t arbitrary dial positions. Each one directly controls energy delivery to ink particles and the tissue around them. Together, these four variables define the full dosimetric profile of your treatment.
+
+          **1. Fluence: Energy Density**
+          Of the four variables, fluence comes first. It’s energy density — defined as the energy per unit area, typically measured in Joules per square centimeter (J/cm²). That number tells you the total dose hitting each square centimeter of skin with every pulse. Higher fluence concentrates more energy into that area. If the fluence is too low, particles won’t absorb enough energy to break apart. Too high, and you risk damage.
+
+          **2. Spot Size Changes Everything**
+          Here’s what catches many off guard: if you keep your laser’s energy the same but dial down the spot size, your fluence shoots up. You’re packing identical energy into a much smaller area. 
+          The relationship follows an inverse square law — **if you halve the spot diameter while keeping the laser's energy constant, the fluence roughly quadruples.** That’s why spot size and fluence are inseparable. Choose one, and you’ve already chosen the other. A small spot delivers a deep, intense punch while a large spot spreads the same dose over a wider, shallower field.
+
+          **3. Fluence vs. Irradiance (Pulse Width)**
+          Fluence and irradiance are related but not the same thing. Fluence is the *total* energy dose per area. Irradiance is the *power* per area at any moment during the pulse (the rate). 
+          To get irradiance, divide fluence by pulse duration. So a very short pulse with the same fluence as a longer one will have dramatically higher irradiance. That difference — the instantaneous power surge — drives the photoacoustic effect. Average power indicates heat load over time. Peak power indicates the mechanical shock delivered to ink.
+
+          **4. Repetition Rate and Thermal Stacking**
+          Repetition rate is measured in Hertz (Hz), or pulses per second. At 10 Hz, ten pulses fire each second. The gap between pulses is the tissue recovery window.
+          If you fire too fast, the heat doesn’t dissipate completely. Residual heat from one pulse adds to the next. This is called **Thermal Stacking**. This cumulative heat buildup is a primary cause of unwanted thermal injury during treatment. Over a full treatment pass, this can push tissue temperature well above safe limits, even if each individual pulse seems moderate. Controlling the repetition rate prevents heat from accumulating and keeps the treatment safe.
+
+          **The Interplay of Variables**
+          These four variables don’t work alone. Shorten the pulse width, and peak power rises for the same fluence. Increase the repetition rate, and the recovery window shrinks. Widen the spot size, and fluence drops unless you add more energy. 
+          
+          **A Clinical Decision Example:** For a dense black tattoo on a light skin type, you pick a wavelength absorbed by black ink (1064 nm). You set the fluence to 4–6 J/cm² to fragment the particles. You use a 6 mm spot size to maintain fluence at depth, and a Rep rate of 2 Hz so the tissue can recover safely between pulses. Every single number has a reason.
+        `,
+        questions: [
+          {
+            id: 'tat-2-1',
+            text: "Fluence is defined as the energy per unit area, typically measured in joules per square centimeter.",
+            options: ["True", "False"],
+            correctIndex: 0,
+            explanation: "True. Fluence measures the total energy dose delivered per area of tissue, expressed as J/cm²."
+          },
+          {
+            id: 'tat-2-2',
+            text: "What happens to fluence when you halve the spot diameter while keeping the laser's energy constant?",
+            options: [
+              "It remains the same.",
+              "It is halved.",
+              "It roughly quadruples.",
+              "It roughly doubles."
+            ],
+            correctIndex: 2,
+            explanation: "Because of the inverse square relationship, packing the exact same amount of energy into a spot that is half the size will roughly quadruple the fluence (energy density)."
+          }
+        ]
+      },
+      {
+        id: 'tat-3',
+        title: "Nanosecond vs. Picosecond Lasers",
+        icon: <Zap className="w-6 h-6 text-black" />,
+        description: "Understanding the controversy: why Q-Switched nanosecond is the gold standard for black ink.",
+        content: `
+          **The Nano vs. Pico Debate**
+          Marketing from massive laser companies has pushed picosecond lasers as the newest, greatest, and most effective devices. While picosecond lasers are a fabulous tool and have a place in the industry, there is an unspoken truth among experienced removalists: **Picosecond lasers are terrible for dense, saturated black tattoo removal results.**
+
+          **The Science Behind the Lasers**
+          Pulse width determines how long a laser burst lasts. 
+          • **Nanosecond (Q-Switched):** The M22 operates in nanoseconds (6-8 ns). Nanosecond pulses produce a balanced **photothermal** (heat) AND **photoacoustic** (shockwave) effect.
+          • **Picosecond:** Fires pulses between 100 and 750 picoseconds—up to a hundred times shorter. This shifts the primary mechanism almost entirely toward photoacoustic pressure, with very little heat deposited.
+
+          **The Shortcoming of Picosecond for Black Ink**
+          When you have a highly saturated, dark, dense black tattoo, that thermal heat provided by a nanosecond laser is required to create a stronger shattering effect. A purer photoacoustic effect (picosecond) is actually *less* effective when there is a massive volume of black ink. Having less photothermal effect leads to a much slower, and sometimes impossible, result. A dark black tattoo that might take 8-10 sessions with a nanosecond laser could easily take 15-20 frustrating sessions with a picosecond device.
+
+          **Where Picosecond Lasers Shine**
+          If you have a tattoo with notoriously difficult colors like blues, greens, or even yellows, a picosecond laser is exactly what you need. The pure photoacoustic effect from specific wavelengths is extremely effective for clearing those bright colors that a Q-Switch cannot touch. 
+
+          **The Ideal Clinical Approach**
+          In a perfect world, a clinic would use a Q-Switched nanosecond laser (like the M22) for the first 80-90% of the removal process. Once the heavy black saturation has been cleared and the remaining ink is super light and sparse, switching to a picosecond laser would treat those final, tiny stubborn pigment particles more effectively to achieve the ultimate holy grail result.
+
+          *Takeaway:* Black ink makes up 90% of tattoos. Equip yourself with the knowledge that a Q-Switched nanosecond laser is the premier tool for effectively breaking down saturated black ink.
+        `,
+        questions: [
+          {
+            id: 'tat-3-1',
+            text: "Picosecond lasers are the most effective option for removing dark, saturated black tattoos.",
+            options: ["True", "False"],
+            correctIndex: 1,
+            explanation: "False. Picosecond lasers lack the necessary photothermal (heat) effect needed to efficiently break down massive volumes of dense black ink, making nanosecond lasers superior for saturated black tattoos."
+          },
+          {
+            id: 'tat-3-2',
+            text: "According to the lesson, which type of laser is most effective for removing dark, saturated black tattoos?",
+            options: [
+              "Picosecond laser",
+              "Neither laser works well for black tattoos",
+              "Q-switch nanosecond laser",
+              "Both are equally effective for black tattoos"
+            ],
+            correctIndex: 2,
+            explanation: "The Q-switch nanosecond laser delivers the perfect balance of photothermal heat and photoacoustic shock needed to aggressively shatter dense black ink."
+          }
+        ]
+      },
+      {
+        id: 'tat-4',
+        title: "Tattoo Typology & Device Presets",
+        icon: <BookOpen className="w-6 h-6 text-stone-800" />,
+        description: "Analyzing ink types, paradoxical darkening, and parameter adjustments.",
+        content: `
+          **Tattoo Typology**
+          Tattoo dye composition is quite variable. Ink placement necessitates deeply penetrating lasers (like 1064nm) to achieve clearance.
+          • **Professional Tattoos:** Contain organometallic dyes, are dense, and placed deep. Usually require 6-10 sessions.
+          • **Amateur Tattoos:** Contain carbon-rich mixtures (like India ink), are sparse, and placed irregularly but mostly superficially. Usually require 4-6 sessions.
+          • **Traumatic Tattoos:** Result from explosions, asphalt, or gunpowder. *Warning:* Explosive particles may react dangerously with laser therapy and ignite, leading to pock-like scarring. 
+
+          **Paradoxical Darkening (Cosmetic Tattoos)**
+          Approach pink, red, and flesh-tone tattoos (such as lip liner or cosmetic eyeliner) with extreme caution. Laser energy can cause a chemical transformation of the ferric oxide into ferrous oxide. This results in a paradoxical darkening of the ink (it turns black), which is often highly resistant to additional QS laser therapy.
+
+          **Spot Size and Fluence Selection on the M22**
+          The M22 offers 7 tip sizes (from 2.0mm to 8.0mm). 
+          *Rule of Thumb:* **Larger tip sizes penetrate deeper and deliver less fluence.** Larger spot sizes are more suited for:
+          1. Higher densities of pigment/tattoo ink.
+          2. Darker skin types.
+          3. Sensitive body areas.
+          From session to session, as the dark tattoo becomes lighter, reducing the spot size will increase the energy deposits to shatter the remaining stubborn pigment. Any change of settings implies a new test patch!
+        `,
+        questions: [
+          {
+            id: 'tat-4-1',
+            text: "A patient requests removal of permanent cosmetic flesh-toned lip liner. What is a major clinical risk?",
+            options: [
+              "The laser will immediately dissolve the ink and leave a white scar.",
+              "The laser may cause a chemical reaction (ferric oxide to ferrous oxide), causing the ink to turn black and become highly resistant to further treatment.",
+              "Cosmetic ink absorbs too much water and will cause a severe burn.",
+              "Flesh-toned ink reflects the laser perfectly, causing no reaction at all."
+            ],
+            correctIndex: 1,
+            explanation: "This is known as paradoxical darkening. Treating cosmetic pink, red, or flesh tones can instantly turn the tattoo black and permanent."
+          },
+          {
+            id: 'tat-4-2',
+            text: "When adjusting settings on the M22, what is true regarding larger tip sizes (e.g., 6.0mm or 8.0mm)?",
+            options: [
+              "Larger tips penetrate shallower and deliver more fluence.",
+              "Larger tips penetrate deeper, deliver less fluence, and are better for higher ink densities and darker skin types.",
+              "Larger tips have the highest risk of burning and should only be used on Skin Type I.",
+              "Tip size has no effect on depth or fluence."
+            ],
+            correctIndex: 1,
+            explanation: "Larger tip sizes drive the energy deeper into the dermis but deliver less total surface fluence, making them the safest starting point for dense tattoos and darker skin."
+          }
+        ]
+      },
+      {
+        id: 'tat-5',
+        title: "Clinical Endpoints, Spacing & Maintenance",
+        icon: <ShieldCheck className="w-6 h-6 text-black" />,
+        description: "Proper technique, frosting, aftercare, and system calibration.",
+        content: `
+          **Treatment Technique & Endpoints**
+          Ensure the distal end of the tip touches the skin perpendicularly with minimal pressure. Keep the tip "legs" in contact with the skin without scratching the already treated area. 
+          • **The Endpoint ("Frosting"):** The immediate, desired visual endpoint during dark tattoo removal is a flash of white light followed by epidermal whitening (frosting). This white, ash-like appearance is caused by rapid steam/gas bubble formation from the shattered ink. It typically subsides within 10 to 20 minutes. If not observed, the laser exposure dose is likely insufficient.
+          • **Other Normal Reactions:** Mild erythema, swelling, and occasional pinpoint bleeding. If pinpoint bleeding occurs, gently pat the area dry with a sterile gauze before proceeding to prevent blood splatter.
+
+          **Treatment Intervals and Aftercare**
+          Because the immune system needs time to clear the shattered ink, treatments should be spaced **6 to 8 weeks apart minimum**. Treating too soon does not speed up removal; it simply damages the skin and increases the risk of scarring. 
+          • Post-op: Cool the area immediately. Apply antibiotic ointment or hydrogel dressing. 
+          • Hydration: Post-treatment, patients should drink 8-10 glasses of water to encourage lymphatic drainage of the ink.
+
+          **Crucial Device Maintenance: Calibration**
+          Energy calibration compensates for laser deterioration. The M22 requires QS Nd:YAG treatment head calibration at first connection and **at least every 50,000 pulses**. 
+          *Warning:* Calibration must ALWAYS be done WITHOUT the lens assembly attached.
+        `,
+        questions: [
+          {
+            id: 'tat-5-1',
+            text: "What is the immediate, desired clinical endpoint when firing the QS Nd:YAG over a dark tattoo?",
+            options: [
+              "Immediate disappearance of the tattoo forever.",
+              "Epidermal frosting (a white, ash-like appearance) caused by gas bubbles.",
+              "Severe bruising and large hematomas.",
+              "The skin turning completely black."
+            ],
+            correctIndex: 1,
+            explanation: "Frosting is the expected clinical endpoint indicating the ink has shattered. It is caused by gas bubbles and usually fades in 10-20 minutes."
+          },
+          {
+            id: 'tat-5-2',
+            text: "How often should the M22 QS Nd:YAG treatment head be calibrated, and how should it be configured?",
+            options: [
+              "Every 10,000 pulses, with the lens assembly attached.",
+              "Every 50,000 pulses, WITHOUT the lens assembly attached.",
+              "Once a year, with a 2.0mm tip attached.",
+              "Calibration is automatic and never needs to be done manually."
+            ],
+            correctIndex: 1,
+            explanation: "Calibration ensures accurate energy output. It must be performed at least every 50,000 pulses and the lens assembly must be removed prior to calibrating."
+          },
+          {
+            id: 'tat-5-3',
+            text: "Why is a minimum of 6 to 8 weeks required between tattoo removal sessions?",
+            options: [
+              "To give the machine time to rest.",
+              "To allow the patient's hair to grow back.",
+              "Because the immune system (macrophages) needs time to clear the shattered ink through the lymphatic system.",
+              "To ensure the numbing cream fully wears off."
+            ],
+            correctIndex: 2,
+            explanation: "Treating too soon increases scarring risks without speeding up removal. The body physically needs 6-8 weeks to flush the shattered ink particles away."
+          }
+        ]
+      }
+    ],
+    practical: [
+      { id: 'tat-p1', label: 'Observed and Performed M22 QS Nd:YAG Startup & Safety (OD > 4.0 Eyewear)' },
+      { id: 'tat-p2', label: 'Observed and Performed Device Calibration (Without Lens Assembly)' },
+      { id: 'tat-p3', label: 'Observed and Performed Pre-Treatment Contraindication Screening (Tans, Gold Therapy, Double Tattoos)' },
+      { id: 'tat-p4', label: 'Observed and Performed Test Patch with Minimum 30-min Wait Time' },
+      { id: 'tat-p5', label: 'Observed and Performed 3 Tattoo Removal Treatments (Tip Legs in Contact, No Scratching)' },
+      { id: 'tat-p6', label: 'Demonstrated Recognition of Proper Clinical Endpoints (Frosting & Pinpoint Bleeding)' },
+      { id: 'tat-p7', label: 'Observed and Performed Post-Care Education (Lymphatic Drainage Hydration)' },
+      { id: 'tat-p8', label: 'Observed and Performed Proper Cleaning of Lens Assembly & Metallic Tips' }
+    ]
+  },
+  {
     id: 'microneedling',
     title: 'Microneedling (Coming Soon)',
     modules: [
