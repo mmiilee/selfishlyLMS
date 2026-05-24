@@ -55,10 +55,6 @@ const formatTime = (totalSeconds) => {
   return `${m}m ${s}s`;
 };
 
-// --- CUSTOM LUXE COLORS ---
-const BRAND_BROWN = "#8B4828";
-const BRAND_LIGHT_BROWN = "#d4b09e";
-
 // --- LHR MODULES ---
 const LHR_MODULES = [
   {
@@ -1018,6 +1014,7 @@ export default function App() {
   const [activeCertId, setActiveCertId] = useState('lhr');
   
   // Dashboard Specific State
+  const [studentActiveTab, setStudentActiveTab] = useState('dashboard'); // 'dashboard', 'courses', 'course-details', 'completion'
   const [activeModuleId, setActiveModuleId] = useState(LHR_MODULES[0].id);
   const [readingMode, setReadingMode] = useState(false);
   const [readingStartTime, setReadingStartTime] = useState(null);
@@ -1146,7 +1143,6 @@ export default function App() {
   let totalAttempts = 0;
   if (studentData.quizPerformance) {
     Object.values(studentData.quizPerformance).forEach(modulePerf => {
-      // Sum all attempts across all modules the student has taken
       totalAttempts += (modulePerf.attempts || 0);
     });
   }
@@ -1157,7 +1153,6 @@ export default function App() {
     const nameInput = e.target.elements.name.value.trim();
     if (!nameInput) return;
     
-    // Supervisor PIN Verification
     if (role === 'supervisor') {
       const pinInput = e.target.elements.pin.value;
       if (pinInput !== SUPERVISOR_ACCESS_PIN) {
@@ -1166,9 +1161,10 @@ export default function App() {
       }
     }
     
-    setLoginError(''); // Clear any previous errors
+    setLoginError(''); 
     setCurrentUser({ name: nameInput, role });
-    setActiveModuleId(LHR_MODULES[0].id); // Reset view
+    setActiveModuleId(LHR_MODULES[0].id); 
+    setStudentActiveTab('dashboard'); 
     setAppState(role === 'student' ? 'student-dash' : 'supervisor-dash');
     window.scrollTo(0, 0);
   };
@@ -1334,7 +1330,6 @@ export default function App() {
       await updateDoc(docRef, {
         [`courseFeedback.${activeCertId}`]: courseFeedbackText
       });
-      // Pick a random quote and show success screen
       setTimeout(() => {
         setCourseFeedbackQuote(quotes[Math.floor(Math.random() * quotes.length)]);
         setIsSavingCourseFeedback(false);
@@ -1402,7 +1397,6 @@ export default function App() {
       await updateDoc(docRef, {
         [`practicalChecklist.${itemId}`]: newValue
       });
-      // The snapshot listener handles syncing this data for both views!
     } catch (err) {
       console.error("Error saving practical item", err);
     }
@@ -1476,7 +1470,389 @@ export default function App() {
   );
 
   const renderLuxeStudentDashboard = () => {
-    const isPassedActive = theoreticalProgress[activeModule.id] === 'passed';
+    // Global Stats for the Analytics Dashboard
+    const totalAllModules = CERTIFICATIONS.reduce((acc, c) => acc + c.modules.length, 0);
+    const totalPassedAll = CERTIFICATIONS.reduce((acc, c) => acc + c.modules.filter(m => theoreticalProgress[m.id] === 'passed').length, 0);
+    const overallCompletionPct = totalAllModules === 0 ? 0 : Math.round((totalPassedAll / totalAllModules) * 100);
+
+    const totalAllPrac = CERTIFICATIONS.reduce((acc, c) => acc + c.practical.length, 0);
+    const totalPracChecked = CERTIFICATIONS.reduce((acc, c) => acc + c.practical.filter(p => practicalChecklist[p.id] === true).length, 0);
+    const overallPracPct = totalAllPrac === 0 ? 0 : Math.round((totalPracChecked / totalAllPrac) * 100);
+
+    const renderStudentAnalytics = () => (
+      <div className="col-span-1 lg:col-span-9 flex flex-col gap-6 animate-in fade-in duration-300">
+         {/* Top Banner */}
+         <div className="bg-[#8B4828] rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+           <div className="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+             <Sparkles className="w-64 h-64" />
+           </div>
+           <p className="text-xs font-bold text-[#f5dbce] uppercase tracking-wider mb-2">EMPLOYEE LOGIN</p>
+           <h2 className="text-3xl sm:text-5xl font-bold mb-4 relative z-10 tracking-tight">SELFishly Training Dashboard</h2>
+           <p className="text-[#e8d5cc] text-sm sm:text-base leading-relaxed max-w-2xl relative z-10">Clinical modules, quizzes, certification progress, and practical observations are now pulled into your luxury LMS preview.</p>
+         </div>
+
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Luxury Analytics Dashboard Card */}
+            <div className="bg-gradient-to-br from-[#2C1A14] to-[#1a0f0c] rounded-3xl p-8 shadow-2xl border border-[#3e2720] flex flex-col justify-between relative overflow-hidden">
+               <div className="absolute -right-10 -bottom-10 opacity-5 pointer-events-none">
+                 <Activity className="w-64 h-64" />
+               </div>
+               <div className="relative z-10">
+                 <p className="text-[#d4b09e] text-[10px] font-bold uppercase tracking-widest mb-3">Luxury Analytics Dashboard</p>
+                 <h3 className="text-3xl sm:text-4xl font-bold text-white mb-5 leading-tight tracking-tight">Clinical<br/>Education<br/>Performance</h3>
+                 <p className="text-stone-400 text-sm leading-relaxed mb-8 pr-4">Real-time certification analytics, provider completion tracking, quiz accuracy, and operational readiness across the SELFishly LMS ecosystem.</p>
+               </div>
+               
+               <div className="grid grid-cols-2 gap-4 relative z-10">
+                 <div className="bg-[#ffffff]/5 p-5 rounded-2xl border border-[#ffffff]/10 backdrop-blur-sm">
+                   <span className="text-3xl sm:text-4xl font-bold text-white block mb-1">{overallCompletionPct}%</span>
+                   <span className="text-[9px] sm:text-[10px] text-[#d4b09e] uppercase font-bold tracking-widest">Average Theory<br/>Completion</span>
+                 </div>
+                 <div className="bg-[#ffffff]/5 p-5 rounded-2xl border border-[#ffffff]/10 backdrop-blur-sm">
+                   <span className="text-3xl sm:text-4xl font-bold text-white block mb-1">{totalPassedAll}</span>
+                   <span className="text-[9px] sm:text-[10px] text-[#d4b09e] uppercase font-bold tracking-widest">Total Modules<br/>Passed</span>
+                 </div>
+               </div>
+            </div>
+
+            {/* Certification Completion Card */}
+            <div className="bg-[#3b2116] rounded-3xl p-8 shadow-2xl border border-[#4a2b1d] flex flex-col relative overflow-hidden">
+              <p className="text-[#d4b09e] text-[10px] font-bold uppercase tracking-widest mb-3">Certification Completion</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-8 tracking-tight">Provider Progress<br/>Overview</h3>
+              
+              <div className="space-y-8 mt-auto relative z-10">
+                {CERTIFICATIONS.map(cert => {
+                   const cPassed = cert.modules.filter(m => theoreticalProgress[m.id] === 'passed').length;
+                   const cProg = cert.modules.length === 0 ? 0 : Math.round((cPassed / cert.modules.length) * 100);
+                   
+                   return (
+                     <div key={cert.id}>
+                       <div className="flex justify-between items-end mb-2.5">
+                         <span className="text-sm font-bold text-white tracking-wide">{cert.title}</span>
+                         <span className="text-sm font-bold text-white">{cProg}%</span>
+                       </div>
+                       <div className="w-full bg-[#24140d] h-2.5 rounded-full overflow-hidden shadow-inner">
+                         <div className="h-full bg-[#d4b09e] rounded-full transition-all duration-1000 ease-out" style={{ width: `${cProg}%` }}></div>
+                       </div>
+                     </div>
+                   )
+                })}
+                <div className="pt-4">
+                   <div className="flex justify-between items-end mb-2.5">
+                     <span className="text-sm font-bold text-white tracking-wide">Practical Sign-Off Completion</span>
+                     <span className="text-sm font-bold text-white">{overallPracPct}%</span>
+                   </div>
+                   <div className="w-full bg-[#24140d] h-2.5 rounded-full overflow-hidden shadow-inner">
+                     <div className="h-full bg-white rounded-full transition-all duration-1000 ease-out" style={{ width: `${overallPracPct}%` }}></div>
+                   </div>
+                </div>
+              </div>
+            </div>
+         </div>
+      </div>
+    );
+
+    const renderCourseOverview = () => (
+      <div className="col-span-1 lg:col-span-9 flex flex-col gap-6 animate-in fade-in duration-300">
+         <div className="bg-[#8B4828] rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+           <h2 className="text-3xl font-bold mb-3 relative z-10 tracking-tight">Clinical Provider Tracks</h2>
+           <p className="text-[#e8d5cc] text-sm relative z-10">Select a certification track to continue your theoretical modules and view practical task checklists.</p>
+         </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           {CERTIFICATIONS.map(cert => {
+              const cPassed = cert.modules.filter(m => theoreticalProgress[m.id] === 'passed').length;
+              const cProg = cert.modules.length === 0 ? 0 : Math.round((cPassed / cert.modules.length) * 100);
+              const isCertSignedOff = !!studentData.signoffs?.[cert.id];
+              return (
+                <div key={cert.id} className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg flex flex-col">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-white">{cert.title}</h3>
+                    {isCertSignedOff && <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0"/>}
+                  </div>
+                  <div className="mb-8">
+                    <div className="flex justify-between items-end mb-2.5">
+                      <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">Course Progress</span>
+                      <span className="text-sm font-bold text-white">{cProg}%</span>
+                    </div>
+                    <div className="w-full bg-[#171311] h-2 rounded-full overflow-hidden shadow-inner">
+                      <div className="h-full bg-[#d4b09e] rounded-full transition-all duration-1000 ease-out" style={{ width: `${cProg}%` }}></div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => { setActiveCertId(cert.id); setStudentActiveTab('course-details'); window.scrollTo(0,0); }}
+                    className="w-full bg-[#302624] hover:bg-[#8B4828] text-white py-3.5 rounded-xl font-bold transition-colors mt-auto flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    Enter Course <ArrowRight className="w-4 h-4"/>
+                  </button>
+                </div>
+              );
+           })}
+         </div>
+      </div>
+    );
+
+    const renderCompletionStatus = () => (
+      <div className="col-span-1 lg:col-span-9 flex flex-col gap-6 animate-in fade-in duration-300">
+         <div className="bg-[#171311] border border-stone-800 rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+           <div className="absolute right-0 top-0 opacity-5 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+             <Award className="w-64 h-64" />
+           </div>
+           <h2 className="text-3xl font-bold mb-3 relative z-10 tracking-tight flex items-center gap-3">
+             <CheckCircle className="w-8 h-8 text-[#d4b09e]"/> Completion Status
+           </h2>
+           <p className="text-stone-400 text-sm relative z-10 max-w-2xl">Review your completed modules and verified practical tasks across all certification tracks. Once a track is signed off by a supervisor, your official certificate will be available here.</p>
+         </div>
+
+         {CERTIFICATIONS.map(cert => {
+            const passedModules = cert.modules.filter(m => theoreticalProgress[m.id] === 'passed');
+            const isCertSignedOff = !!studentData.signoffs?.[cert.id];
+
+            return (
+              <div key={cert.id} className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 sm:p-8 shadow-lg mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-stone-800/50 pb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">{cert.title}</h3>
+                    <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">{passedModules.length} / {cert.modules.length} Modules Completed</p>
+                  </div>
+                  {isCertSignedOff ? (
+                    <button onClick={() => { setActiveCertId(cert.id); setAppState('certificate'); window.scrollTo(0,0); }} className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-5 py-2.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-sm shadow-md w-full sm:w-auto">
+                      <Printer className="w-4 h-4"/> View Certificate
+                    </button>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#171311] text-stone-500 text-xs font-bold border border-stone-800">
+                      Pending Supervisor Sign-Off
+                    </span>
+                  )}
+                </div>
+                
+                <h4 className="font-bold text-[#d4b09e] text-xs uppercase tracking-widest mb-4">Passed Theoretical Modules</h4>
+                {passedModules.length === 0 ? (
+                  <p className="text-stone-600 italic text-sm mb-6">No modules completed yet.</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+                    {passedModules.map(m => (
+                      <div key={m.id} className="bg-[#171311] border border-stone-800 p-4 rounded-2xl flex items-start gap-3 transition-colors hover:border-stone-700">
+                         <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"/>
+                         <div>
+                           <span className="text-stone-200 text-sm font-bold block mb-1">{m.title}</span>
+                           <span className="text-stone-500 text-[10px] uppercase tracking-wider">{m.track}</span>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+         })}
+      </div>
+    );
+
+    const renderCourseDetails = () => {
+      const isPassedActive = theoreticalProgress[activeModule.id] === 'passed';
+      
+      return (
+        <div className="col-span-1 lg:col-span-9 flex flex-col gap-6 animate-in fade-in duration-300">
+           <button onClick={() => { setStudentActiveTab('courses'); window.scrollTo(0,0); }} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors w-fit bg-[#171311] px-4 py-2 rounded-full border border-stone-800">
+             <ArrowLeft className="w-4 h-4"/> Back to All Tracks
+           </button>
+           
+           <div className="bg-[#8B4828] rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+              <div className="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+                <GraduationCap className="w-64 h-64" />
+              </div>
+              <p className="text-xs font-bold text-[#f5dbce] uppercase tracking-wider mb-2">COURSE OVERVIEW</p>
+              <h2 className="text-3xl font-bold mb-3 relative z-10">{activeCert.title}</h2>
+           </div>
+
+           <div className="grid grid-cols-3 gap-4">
+              <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 text-center shadow-lg flex flex-col justify-center items-center">
+                 <span className="text-3xl sm:text-4xl font-extrabold text-white block mb-1">{totalModules}</span>
+                 <span className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wide">Active Modules</span>
+              </div>
+              <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 text-center shadow-lg flex flex-col justify-center items-center">
+                 <span className="text-3xl sm:text-4xl font-extrabold text-white block mb-1">{avgCompletion}%</span>
+                 <span className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wide">Avg Completion</span>
+              </div>
+              <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 text-center shadow-lg flex flex-col justify-center items-center">
+                 <span className="text-3xl sm:text-4xl font-extrabold text-white block mb-1">{completedPracticalCount}/{totalPractical}</span>
+                 <span className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wide">Practical Tasks</span>
+              </div>
+           </div>
+
+           {isFullyReadyForSignoff && !isSignedOff && (
+              <div className="bg-[#1c221e] border border-emerald-900/50 rounded-3xl p-6 flex items-start gap-4 shadow-lg">
+                <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-bold text-emerald-300 text-lg">Ready for Supervisor Sign-Off</h3>
+                  <p className="text-sm text-emerald-100/70 mt-1.5 leading-relaxed">You have completed all theoretical modules and practical requirements for this track. Please notify your clinical supervisor to review your profile.</p>
+                </div>
+              </div>
+           )}
+
+           <div className="grid grid-cols-1 lg:grid-cols-9 gap-6">
+              {/* Center Content (Modules List) */}
+              <div className="col-span-1 lg:col-span-6 flex flex-col gap-6">
+                <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Training Modules</h3>
+                      <p className="text-sm text-stone-400">Select a module to view materials.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {activeCert.modules.map(module => {
+                      const isPassed = theoreticalProgress[module.id] === 'passed';
+                      const isActive = activeModuleId === module.id;
+                      
+                      return (
+                        <div 
+                          key={module.id} 
+                          onClick={() => selectModule(module.id)}
+                          className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col gap-3 group ${
+                            isActive ? 'border-[#8B4828] bg-[#2e1d16] shadow-md' : isPassed ? 'border-stone-800/60 bg-[#171311]/40 opacity-75 hover:opacity-100 hover:border-[#4d3a33] hover:bg-[#1f1917]' : 'border-stone-800 bg-[#171311] hover:border-[#4d3a33] hover:bg-[#1f1917]'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className={`font-bold text-[15px] mb-1.5 transition-colors flex items-center gap-2 ${isActive ? 'text-[#f5dbce]' : isPassed ? 'text-stone-400 group-hover:text-stone-200' : 'text-stone-200 group-hover:text-white'}`}>
+                                {module.title}
+                                {isPassed && <CheckCircle className="w-4 h-4 text-emerald-500/80" />}
+                              </h4>
+                              <p className="text-xs text-stone-500 font-medium">{module.track} • {module.duration}</p>
+                            </div>
+                            <ChevronRight className={`w-5 h-5 transition-transform ${isActive ? 'text-[#8B4828]' : 'text-stone-600 group-hover:text-stone-400'} ${isActive ? 'translate-x-1' : ''}`} />
+                          </div>
+                          
+                          <div className="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
+                            <div className={`h-full transition-all duration-1000 ${isPassed ? 'bg-[#8B4828] w-full' : isActive ? 'bg-[#d4b09e] w-1/4' : 'w-0'}`}></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Content (Now Viewing & Checklist) */}
+              <div className="col-span-1 lg:col-span-3 flex flex-col gap-6">
+                <div className="bg-[#171311] border border-stone-800 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
+                   <div className="absolute -right-4 -top-4 opacity-5 pointer-events-none">
+                     {React.cloneElement(activeModule.icon, { className: "w-32 h-32" })}
+                   </div>
+                   
+                   <div className="flex items-center gap-2 text-[10px] font-bold text-[#d4b09e] uppercase tracking-widest mb-3 relative z-10">
+                     <BookOpen className="w-3.5 h-3.5"/> Now Viewing
+                   </div>
+                   <h3 className="text-xl font-bold mb-4 leading-tight pr-4 relative z-10 text-white">{activeModule.title}</h3>
+                   
+                   <div className="mb-6 relative z-10">
+                     <div className="flex justify-between items-center text-xs font-bold text-stone-500 mb-2">
+                       <span>{isPassedActive ? '100% complete' : 'Ready to begin'}</span>
+                       <div className="flex items-center gap-3">
+                         <span className="flex items-center gap-1.5 text-[#d4b09e]">
+                           <Clock className="w-3.5 h-3.5" /> {formatTime(studentData.moduleTimeSpent?.[activeModule.id])}
+                         </span>
+                         {isPassedActive && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                       </div>
+                     </div>
+                     <div className="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
+                       <div className={`h-full ${isPassedActive ? 'bg-[#d4b09e] w-full' : 'bg-stone-600 w-1/12'}`}></div>
+                     </div>
+                   </div>
+
+                   <button 
+                     onClick={handleOpenReadingMode} 
+                     className="w-full bg-[#8B4828] hover:bg-[#a85a36] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg relative z-10"
+                   >
+                     <Play className="w-4 h-4" fill="currentColor" /> {isPassedActive ? 'Review Lesson' : 'Start Reading'}
+                   </button>
+                </div>
+
+                {studentData.supervisorComments?.[activeModuleId] && (
+                  <div className="bg-[#8B4828]/10 border border-[#8B4828]/30 rounded-3xl p-6 shadow-sm">
+                     <h3 className="font-bold text-lg mb-2 text-[#d4b09e] flex items-center gap-2"><MessageCircle className="w-4 h-4"/> Supervisor Notes</h3>
+                     <p className="text-sm text-stone-200 leading-relaxed">{studentData.supervisorComments[activeModuleId]}</p>
+                  </div>
+                )}
+
+                <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg flex flex-col">
+                  <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2"><CheckSquare className="w-4 h-4 text-[#8B4828]"/> Practical Tasks</h3>
+                  <div className="flex items-center justify-between mb-5">
+                    <p className="text-xs text-stone-400">Evaluated by clinical supervisor only.</p>
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#171311] text-stone-300 border border-stone-800">
+                      {completedPracticalCount} / {totalPractical}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                    {activeCert.practical.map((item) => {
+                      const isChecked = practicalChecklist[item.id] === true;
+                      return (
+                        <div key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all cursor-default ${isChecked ? 'bg-[#171311] border-[#8B4828]/50 shadow-sm' : 'bg-[#171311] border-stone-800 opacity-70'}`}>
+                          <div className="pt-0.5">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 text-[#8B4828] bg-[#231C1A] rounded border-stone-700 focus:ring-[#8B4828] focus:ring-offset-[#171311]" 
+                              checked={isChecked}
+                              onChange={() => {}} // Disabled for employees
+                              disabled={true}
+                            />
+                          </div>
+                          <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Panel (Feedback) */}
+              <div className="col-span-1 lg:col-span-9 flex flex-col gap-6 animate-in fade-in duration-300">
+                <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-8 shadow-lg">
+                   <h3 className="font-bold text-xl mb-2 text-white flex items-center gap-3"><MessageCircle className="w-5 h-5 text-[#8B4828]"/> End of Course Feedback</h3>
+                   
+                   {showCourseFeedbackSuccess ? (
+                     <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-300">
+                        <div className="mx-auto w-14 h-14 bg-emerald-950/30 rounded-full flex items-center justify-center mb-5 border border-emerald-900/50">
+                           <CheckCircle className="w-7 h-7 text-emerald-500" />
+                        </div>
+                        <h4 className="text-white font-bold text-lg mb-2 tracking-wide">Feedback Saved!</h4>
+                        <p className="text-[#d4b09e] text-base italic font-serif leading-relaxed mb-6 px-4 max-w-2xl mx-auto">
+                          "{courseFeedbackQuote}"
+                        </p>
+                        <button 
+                           onClick={() => setShowCourseFeedbackSuccess(false)}
+                           className="text-sm font-bold text-stone-400 hover:text-white underline underline-offset-4 transition-colors"
+                        >
+                          Edit or Add More Feedback
+                        </button>
+                     </div>
+                   ) : (
+                     <>
+                       <p className="text-sm text-stone-400 mb-6">Share your overall thoughts, notes, or questions regarding the <span className="text-stone-300 font-medium">"{activeCert.title}"</span> track with your supervisor.</p>
+                       
+                       <textarea 
+                          value={courseFeedbackText}
+                          onChange={(e) => setCourseFeedbackText(e.target.value)}
+                          placeholder="Type your notes here..."
+                          className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B4828] transition-all min-h-[140px] resize-none mb-5"
+                       />
+                       <button 
+                          onClick={handleSaveCourseFeedback}
+                          disabled={isSavingCourseFeedback || !courseFeedbackText.trim()}
+                          className="w-full sm:w-auto sm:px-10 bg-[#8B4828] hover:bg-[#a85a36] text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center gap-2 text-sm ml-auto"
+                       >
+                          {isSavingCourseFeedback ? <Activity className="w-5 h-5 animate-spin"/> : 'Save Feedback'}
+                       </button>
+                     </>
+                   )}
+                </div>
+              </div>
+           </div>
+        </div>
+      );
+    };
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -1488,247 +1864,36 @@ export default function App() {
              </div>
              <p className="text-xs font-bold text-[#f5dbce] uppercase tracking-wider mb-2">Welcome back, {currentUser.name.split(' ')[0]}</p>
              <h2 className="text-2xl font-bold mb-3 relative z-10">Training Portal</h2>
-             <p className="text-[#e8d5cc] text-sm leading-relaxed relative z-10">Track onboarding, clinical education, policy reviews, and feedback in one polished dashboard.</p>
+             <p className="text-[#e8d5cc] text-sm leading-relaxed relative z-10">A premium LMS built around SELFishly clinical training, quizzes, sign-offs, and certifications.</p>
           </div>
 
           <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-4 shadow-lg flex flex-col gap-2">
-            <button className="flex items-center gap-3 w-full p-3 rounded-xl bg-[#171311] text-white font-bold border border-stone-800 transition-colors">
-              <LayoutDashboard className="w-5 h-5 text-[#d4b09e]"/> Dashboard
+            <button 
+              onClick={() => setStudentActiveTab('dashboard')}
+              className={`flex items-center gap-3 w-full p-3.5 rounded-xl font-bold transition-all border ${studentActiveTab === 'dashboard' ? 'bg-[#171311] text-[#d4b09e] border-stone-800 shadow-sm' : 'text-stone-400 border-transparent hover:bg-[#302624] hover:text-white'}`}
+            >
+              <LayoutDashboard className="w-5 h-5"/> Dashboard
             </button>
-            <button className="flex items-center gap-3 w-full p-3 rounded-xl text-stone-400 hover:bg-[#302624] hover:text-white font-medium transition-colors">
-              <GraduationCap className="w-5 h-5"/> Courses
+            <button 
+              onClick={() => setStudentActiveTab('courses')}
+              className={`flex items-center gap-3 w-full p-3.5 rounded-xl font-bold transition-all border ${(studentActiveTab === 'courses' || studentActiveTab === 'course-details') ? 'bg-[#171311] text-[#d4b09e] border-stone-800 shadow-sm' : 'text-stone-400 border-transparent hover:bg-[#302624] hover:text-white'}`}
+            >
+              <GraduationCap className="w-5 h-5"/> Clinical Provider Tracks
             </button>
-            <button onClick={() => { if(isSignedOff) setAppState('certificate'); window.scrollTo(0,0); }} className={`flex items-center gap-3 w-full p-3 rounded-xl font-medium transition-colors ${isSignedOff ? 'text-[#f5dbce] bg-[#8B4828]/20 border border-[#8B4828]/30' : 'text-stone-400 hover:bg-[#302624] hover:text-white'}`}>
-              <CheckCircle className={`w-5 h-5 ${isSignedOff ? 'text-[#d4b09e]' : ''}`}/> Completion Status
+            <button 
+              onClick={() => setStudentActiveTab('completion')} 
+              className={`flex items-center gap-3 w-full p-3.5 rounded-xl font-bold transition-all border ${studentActiveTab === 'completion' ? 'bg-[#171311] text-[#d4b09e] border-stone-800 shadow-sm' : 'text-stone-400 border-transparent hover:bg-[#302624] hover:text-white'}`}
+            >
+              <CheckCircle className="w-5 h-5"/> Completion Status
             </button>
           </div>
         </div>
 
-        {/* CENTER CONTENT */}
-        <div className="col-span-1 lg:col-span-6 flex flex-col gap-6">
-          <div className="bg-[#8B4828] rounded-3xl p-8 text-white shadow-lg block md:hidden">
-             <p className="text-xs font-bold text-[#f5dbce] uppercase tracking-wider mb-2">EMPLOYEE PORTAL</p>
-             <h2 className="text-3xl font-bold mb-3">SELFishly Training</h2>
-          </div>
-
-          {/* Certification Track Tabs */}
-          <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
-            {CERTIFICATIONS.map(cert => (
-              <button
-                key={cert.id}
-                onClick={() => handleCertChange(cert.id)}
-                className={`px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all shadow-sm border ${activeCertId === cert.id ? 'bg-[#8B4828] text-white border-[#8B4828]' : 'bg-[#231C1A] border-stone-800 text-stone-400 hover:text-white hover:bg-[#302624]'}`}
-              >
-                {cert.title}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 text-center shadow-lg flex flex-col justify-center items-center">
-               <span className="text-3xl sm:text-4xl font-extrabold text-white block mb-1">{totalModules}</span>
-               <span className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wide">Active Modules</span>
-            </div>
-            <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 text-center shadow-lg flex flex-col justify-center items-center">
-               <span className="text-3xl sm:text-4xl font-extrabold text-white block mb-1">{avgCompletion}%</span>
-               <span className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wide">Avg Completion</span>
-            </div>
-            <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 text-center shadow-lg flex flex-col justify-center items-center">
-               <span className="text-3xl sm:text-4xl font-extrabold text-white block mb-1">{completedPracticalCount}/{totalPractical}</span>
-               <span className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wide">Practical Tasks</span>
-            </div>
-          </div>
-
-          {isSignedOff ? (
-            <div className="bg-[#171311] border border-stone-800 rounded-3xl p-6 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6 text-white">
-              <div className="flex items-center gap-4">
-                <div className="bg-[#231C1A] border border-stone-800 p-3 rounded-full shadow-inner"><Award className="w-8 h-8 text-[#d4b09e]" /></div>
-                <div>
-                  <h3 className="font-bold text-lg text-white">Certification Complete</h3>
-                  <p className="text-stone-400 text-xs mt-1">Signed off by {currentSignoff.by} on {new Date(currentSignoff.at).toLocaleDateString()}</p>
-                </div>
-              </div>
-              <button onClick={() => { setAppState('certificate'); window.scrollTo(0,0); }} className="w-full sm:w-auto bg-[#8B4828] hover:bg-[#a85a36] text-white px-6 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-md">
-                <Printer className="w-4 h-4"/> View Certificate
-              </button>
-            </div>
-          ) : isFullyReadyForSignoff ? (
-            <div className="bg-[#1c221e] border border-emerald-900/50 rounded-3xl p-6 flex items-start gap-4 shadow-lg">
-              <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-emerald-300 text-lg">Ready for Supervisor Sign-Off</h3>
-                <p className="text-sm text-emerald-100/70 mt-1.5 leading-relaxed">You have completed all theoretical modules and practical requirements for this track. Please notify your clinical supervisor to review your profile.</p>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Module List */}
-          <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-white">Training Modules</h3>
-                <p className="text-sm text-stone-400">Select a module to view materials.</p>
-              </div>
-              <div className="relative w-full sm:w-auto">
-                <Search className="w-4 h-4 text-stone-500 absolute left-4 top-1/2 transform -translate-y-1/2" />
-                <input type="text" placeholder="Search..." className="w-full sm:w-64 bg-[#171311] text-white placeholder-stone-600 pl-11 pr-4 py-3 rounded-full border border-stone-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B4828] transition-all" />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {activeCert.modules.map(module => {
-                const isPassed = theoreticalProgress[module.id] === 'passed';
-                const isActive = activeModuleId === module.id;
-                
-                return (
-                  <div 
-                    key={module.id} 
-                    onClick={() => selectModule(module.id)}
-                    className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col gap-3 group ${
-                      isActive ? 'border-[#8B4828] bg-[#2e1d16] shadow-md' : isPassed ? 'border-stone-800/60 bg-[#171311]/40 opacity-75 hover:opacity-100 hover:border-[#4d3a33] hover:bg-[#1f1917]' : 'border-stone-800 bg-[#171311] hover:border-[#4d3a33] hover:bg-[#1f1917]'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h4 className={`font-bold text-[15px] mb-1.5 transition-colors flex items-center gap-2 ${isActive ? 'text-[#f5dbce]' : isPassed ? 'text-stone-400 group-hover:text-stone-200' : 'text-stone-200 group-hover:text-white'}`}>
-                          {module.title}
-                          {isPassed && <CheckCircle className="w-4 h-4 text-emerald-500/80" />}
-                        </h4>
-                        <p className="text-xs text-stone-500 font-medium">{module.track} • {module.duration}</p>
-                      </div>
-                      <ChevronRight className={`w-5 h-5 transition-transform ${isActive ? 'text-[#8B4828]' : 'text-stone-600 group-hover:text-stone-400'} ${isActive ? 'translate-x-1' : ''}`} />
-                    </div>
-                    
-                    <div className="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
-                      <div className={`h-full transition-all duration-1000 ${isPassed ? 'bg-[#8B4828] w-full' : isActive ? 'bg-[#d4b09e] w-1/4' : 'w-0'}`}></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT PANEL - Now Viewing, Checklist & Supervisor Notes */}
-        <div className="col-span-1 lg:col-span-3 flex flex-col gap-6">
-          
-          {/* 1. Now Viewing Card */}
-          <div className="bg-[#171311] border border-stone-800 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
-             <div className="absolute -right-4 -top-4 opacity-5 pointer-events-none">
-               {React.cloneElement(activeModule.icon, { className: "w-32 h-32" })}
-             </div>
-             
-             <div className="flex items-center gap-2 text-[10px] font-bold text-[#d4b09e] uppercase tracking-widest mb-3 relative z-10">
-               <BookOpen className="w-3.5 h-3.5"/> Now Viewing
-             </div>
-             <h3 className="text-xl font-bold mb-4 leading-tight pr-4 relative z-10 text-white">{activeModule.title}</h3>
-             
-             <div className="mb-6 relative z-10">
-               <div className="flex justify-between items-center text-xs font-bold text-stone-500 mb-2">
-                 <span>{isPassedActive ? '100% complete' : 'Ready to begin'}</span>
-                 <div className="flex items-center gap-3">
-                   <span className="flex items-center gap-1.5 text-[#d4b09e]">
-                     <Clock className="w-3.5 h-3.5" /> {formatTime(studentData.moduleTimeSpent?.[activeModule.id])}
-                   </span>
-                   {isPassedActive && <CheckCircle className="w-4 h-4 text-emerald-500" />}
-                 </div>
-               </div>
-               <div className="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
-                 <div className={`h-full ${isPassedActive ? 'bg-[#d4b09e] w-full' : 'bg-stone-600 w-1/12'}`}></div>
-               </div>
-             </div>
-
-             <button 
-               onClick={handleOpenReadingMode} 
-               className="w-full bg-[#8B4828] hover:bg-[#a85a36] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg relative z-10"
-             >
-               <Play className="w-4 h-4" fill="currentColor" /> {isPassedActive ? 'Review Lesson' : 'Start Reading'}
-             </button>
-          </div>
-
-          {/* Supervisor Notes display */}
-          {studentData.supervisorComments?.[activeModuleId] && (
-            <div className="bg-[#8B4828]/10 border border-[#8B4828]/30 rounded-3xl p-6 shadow-sm">
-               <h3 className="font-bold text-lg mb-2 text-[#d4b09e] flex items-center gap-2"><MessageCircle className="w-4 h-4"/> Supervisor Notes</h3>
-               <p className="text-sm text-stone-200 leading-relaxed">{studentData.supervisorComments[activeModuleId]}</p>
-            </div>
-          )}
-
-          {/* 2. Practical Checklist (Employee Side - READ ONLY) */}
-          <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg flex flex-col">
-            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2"><CheckSquare className="w-4 h-4 text-[#8B4828]"/> Practical Tasks</h3>
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-xs text-stone-400">Evaluated by clinical supervisor only.</p>
-              <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#171311] text-stone-300 border border-stone-800">
-                {completedPracticalCount} / {totalPractical}
-              </span>
-            </div>
-
-            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-              {activeCert.practical.map((item) => {
-                const isChecked = practicalChecklist[item.id] === true;
-                return (
-                  <div key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all cursor-default ${isChecked ? 'bg-[#171311] border-[#8B4828]/50 shadow-sm' : 'bg-[#171311] border-stone-800 opacity-70'}`}>
-                    <div className="pt-0.5">
-                      <input 
-                        type="checkbox" 
-                        className="w-4 h-4 text-[#8B4828] bg-[#231C1A] rounded border-stone-700 focus:ring-[#8B4828] focus:ring-offset-[#171311]" 
-                        checked={isChecked}
-                        onChange={() => {}} // Disabled for employees
-                        disabled={true}
-                      />
-                    </div>
-                    <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* BOTTOM PANEL - COURSE FEEDBACK */}
-        <div className="col-span-1 lg:col-span-9 lg:col-start-4 flex flex-col gap-6">
-          <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-8 shadow-lg">
-             <h3 className="font-bold text-xl mb-2 text-white flex items-center gap-3"><MessageCircle className="w-5 h-5 text-[#8B4828]"/> End of Course Feedback</h3>
-             
-             {showCourseFeedbackSuccess ? (
-               <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-300">
-                  <div className="mx-auto w-14 h-14 bg-emerald-950/30 rounded-full flex items-center justify-center mb-5 border border-emerald-900/50">
-                     <CheckCircle className="w-7 h-7 text-emerald-500" />
-                  </div>
-                  <h4 className="text-white font-bold text-lg mb-2 tracking-wide">Feedback Saved!</h4>
-                  <p className="text-[#d4b09e] text-base italic font-serif leading-relaxed mb-6 px-4 max-w-2xl mx-auto">
-                    "{courseFeedbackQuote}"
-                  </p>
-                  <button 
-                     onClick={() => setShowCourseFeedbackSuccess(false)}
-                     className="text-sm font-bold text-stone-400 hover:text-white underline underline-offset-4 transition-colors"
-                  >
-                    Edit or Add More Feedback
-                  </button>
-               </div>
-             ) : (
-               <>
-                 <p className="text-sm text-stone-400 mb-6">Share your overall thoughts, notes, or questions regarding the <span className="text-stone-300 font-medium">"{activeCert.title}"</span> track with your supervisor.</p>
-                 
-                 <textarea 
-                    value={courseFeedbackText}
-                    onChange={(e) => setCourseFeedbackText(e.target.value)}
-                    placeholder="Type your notes here..."
-                    className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B4828] transition-all min-h-[140px] resize-none mb-5"
-                 />
-                 <button 
-                    onClick={handleSaveCourseFeedback}
-                    disabled={isSavingCourseFeedback || !courseFeedbackText.trim()}
-                    className="w-full sm:w-auto sm:px-10 bg-[#8B4828] hover:bg-[#a85a36] text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center gap-2 text-sm ml-auto"
-                 >
-                    {isSavingCourseFeedback ? <Activity className="w-5 h-5 animate-spin"/> : 'Save Feedback'}
-                 </button>
-               </>
-             )}
-          </div>
-        </div>
-
+        {/* CONDITIONAL RENDER BASED ON TAB */}
+        {studentActiveTab === 'dashboard' && renderStudentAnalytics()}
+        {studentActiveTab === 'courses' && renderCourseOverview()}
+        {studentActiveTab === 'course-details' && renderCourseDetails()}
+        {studentActiveTab === 'completion' && renderCompletionStatus()}
       </div>
     );
   };
@@ -1917,269 +2082,319 @@ export default function App() {
     </div>
   );
 
-  const renderSupervisorDashboard = () => (
-    <div className="max-w-[1400px] mx-auto space-y-6 mt-8 px-4 sm:px-6">
-      <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
-        {CERTIFICATIONS.map(cert => (
-          <button
-            key={cert.id}
-            onClick={() => { setActiveCertId(cert.id); setExpandedStudentId(null); }}
-            className={`px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all shadow-sm border ${activeCertId === cert.id ? 'bg-[#8B4828] text-white border-[#8B4828]' : 'bg-[#231C1A] border-stone-800 text-stone-400 hover:text-white hover:bg-[#302624]'}`}
-          >
-            {cert.title}
-          </button>
-        ))}
-      </div>
+  const renderSupervisorDashboard = () => {
+    // Calculate global stats for leaderboard
+    const studentStats = allStudents.map(student => {
+      let totalPassed = 0;
+      let totalPrac = 0;
+      let totalReqs = 0;
+      
+      CERTIFICATIONS.forEach(c => {
+         totalReqs += c.modules.length + c.practical.length;
+         totalPassed += c.modules.filter(m => (student.theoreticalProgress || {})[m.id] === 'passed').length;
+         totalPrac += c.practical.filter(p => (student.practicalChecklist || {})[p.id] === true).length;
+      });
+      
+      const score = totalReqs === 0 ? 0 : Math.round(((totalPassed + totalPrac) / totalReqs) * 100);
+      return { ...student, score };
+    }).sort((a, b) => b.score - a.score);
 
-      <div className="bg-[#171311] border border-stone-800 rounded-3xl shadow-xl p-8 text-white relative overflow-hidden">
-        <div className="absolute right-0 top-0 opacity-5 pointer-events-none">
-          <ShieldCheck className="w-64 h-64" />
-        </div>
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="p-5 bg-[#231C1A] rounded-2xl border border-stone-800">
-            <ShieldCheck className="w-10 h-10 text-[#d4b09e]" />
-          </div>
-          <div>
-            <p className="text-[#8B4828] text-[10px] font-bold uppercase tracking-widest mb-1.5">Management Portal</p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Clinical Supervisor Dashboard</h1>
-            <p className="text-stone-400 mt-2 text-sm sm:text-base">Welcome, {currentUser.name}. Review and certify your staff for <span className="font-bold text-white">{activeCert.title}</span> below.</p>
-          </div>
-        </div>
-      </div>
+    const topPerformers = studentStats.slice(0, 4);
 
-      <div className="bg-[#231C1A] rounded-3xl shadow-xl border border-stone-800 overflow-hidden">
-        <div className="px-8 py-6 border-b border-stone-800 bg-[#171311] flex items-center gap-3">
-          <Users className="w-5 h-5 text-[#d4b09e]" />
-          <h2 className="font-bold text-white text-lg tracking-wide">Student Roster</h2>
-        </div>
+    return (
+      <div className="max-w-[1400px] mx-auto space-y-6 mt-8 px-4 sm:px-6">
         
-        {allStudents.length === 0 ? (
-          <div className="p-16 text-center text-stone-500 font-medium">No students have registered yet.</div>
-        ) : (
-          <div className="divide-y divide-stone-800/50">
-            {allStudents.map(student => {
-              const s_theoCount = activeCert.modules.filter(m => (student.theoreticalProgress || {})[m.id] === 'passed').length;
-              const s_pracCount = activeCert.practical.filter(p => (student.practicalChecklist || {})[p.id] === true).length;
-              
-              const s_currentSignoff = student.signoffs?.[activeCertId];
-              const s_isSignedOff = !!s_currentSignoff;
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Main Welcome Banner */}
+          <div className="lg:col-span-2 bg-[#171311] border border-stone-800 rounded-3xl shadow-xl p-8 sm:p-10 text-white relative overflow-hidden flex flex-col justify-center">
+            <div className="absolute right-0 top-0 opacity-5 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+              <ShieldCheck className="w-80 h-80" />
+            </div>
+            <div className="flex items-center gap-6 relative z-10">
+              <div className="p-5 bg-[#231C1A] rounded-2xl border border-stone-800 hidden sm:block shadow-inner">
+                <ShieldCheck className="w-10 h-10 text-[#d4b09e]" />
+              </div>
+              <div>
+                <p className="text-[#8B4828] text-[10px] font-bold uppercase tracking-widest mb-2">Management Portal</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">Clinical Supervisor Dashboard</h1>
+                <p className="text-stone-400 text-sm sm:text-base leading-relaxed max-w-lg">Welcome, {currentUser.name}. Review staff progress, grade practical tasks, and officially sign off on certifications below.</p>
+              </div>
+            </div>
+          </div>
 
-              const isReady = s_theoCount === totalModules && s_pracCount === totalPractical && !s_isSignedOff;
-              const isExpanded = expandedStudentId === student.id;
-              
-              return (
-                <div key={student.id} className="overflow-hidden">
-                  <div 
-                    onClick={() => setExpandedStudentId(isExpanded ? null : student.id)}
-                    className={`p-6 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors cursor-pointer ${isExpanded ? 'bg-[#302624]' : 'hover:bg-[#302624]'}`}
-                  >
-                    <div className="flex items-center gap-5">
-                      <div className="p-2 bg-[#171311] rounded-lg border border-stone-800">
-                        {isExpanded ? <ChevronUp className="w-4 h-4 text-stone-400" /> : <ChevronDown className="w-4 h-4 text-stone-400" />}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-xl text-white tracking-tight">{student.id}</h3>
-                        <div className="flex items-center gap-4 mt-2">
-                          <span className="text-xs font-bold text-stone-400 uppercase tracking-wide">Theory: <span className="text-white">{s_theoCount}/{totalModules}</span></span>
-                          <span className="text-xs font-bold text-stone-400 uppercase tracking-wide">Practical: <span className="text-white">{s_pracCount}/{totalPractical}</span></span>
+          {/* Top Performing Providers Leaderboard */}
+          <div className="lg:col-span-1 bg-gradient-to-br from-[#2C1A14] to-[#1a0f0c] border border-[#3e2720] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <p className="text-[#d4b09e] text-[10px] font-bold uppercase tracking-widest mb-5 flex items-center gap-2"><Award className="w-3.5 h-3.5"/> Top Performing Providers</p>
+            <div className="space-y-3.5 relative z-10">
+              {topPerformers.map((sp, idx) => (
+                 <div key={sp.id} className="bg-[#ffffff]/5 border border-[#ffffff]/10 rounded-2xl p-3 flex items-center justify-between backdrop-blur-sm shadow-sm transition-all hover:bg-[#ffffff]/10">
+                   <div className="flex items-center gap-3">
+                     <div className="w-9 h-9 rounded-full bg-[#8B4828] text-white flex items-center justify-center font-bold text-sm shadow-inner">{sp.id.charAt(0)}</div>
+                     <div>
+                       <p className="text-white font-bold text-sm leading-none">{sp.id}</p>
+                       <p className="text-[#d4b09e] text-[9px] uppercase tracking-widest mt-1.5 opacity-80">Clinical Team</p>
+                     </div>
+                   </div>
+                   <span className="text-white font-bold text-sm bg-[#1a0f0c] px-3 py-1.5 rounded-lg border border-[#3e2720]">{sp.score}%</span>
+                 </div>
+              ))}
+              {topPerformers.length === 0 && <p className="text-stone-500 text-sm font-medium mt-4">No data available yet.</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Selection */}
+        <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+           <h3 className="text-sm font-bold text-stone-300 uppercase tracking-wider flex items-center gap-2">
+              <Users className="w-5 h-5 text-[#d4b09e]"/> Select Certification Roster:
+           </h3>
+           <div className="flex overflow-x-auto gap-3 w-full sm:w-auto no-scrollbar">
+            {CERTIFICATIONS.map(cert => (
+              <button
+                key={cert.id}
+                onClick={() => { setActiveCertId(cert.id); setExpandedStudentId(null); }}
+                className={`px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap transition-all shadow-sm border ${activeCertId === cert.id ? 'bg-[#8B4828] text-white border-[#8B4828]' : 'bg-[#171311] border-stone-800 text-stone-400 hover:text-white hover:bg-[#302624]'}`}
+              >
+                {cert.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active Roster List */}
+        <div className="bg-[#231C1A] rounded-3xl shadow-xl border border-stone-800 overflow-hidden">
+          <div className="px-8 py-5 border-b border-stone-800 bg-[#171311] flex items-center justify-between gap-3">
+            <h2 className="font-bold text-stone-400 text-sm tracking-widest uppercase">Viewing: <span className="text-white ml-1">{activeCert.title}</span></h2>
+          </div>
+          
+          {allStudents.length === 0 ? (
+            <div className="p-16 text-center text-stone-500 font-medium">No students have registered yet.</div>
+          ) : (
+            <div className="divide-y divide-stone-800/50">
+              {allStudents.map(student => {
+                const s_theoCount = activeCert.modules.filter(m => (student.theoreticalProgress || {})[m.id] === 'passed').length;
+                const s_pracCount = activeCert.practical.filter(p => (student.practicalChecklist || {})[p.id] === true).length;
+                
+                const s_currentSignoff = student.signoffs?.[activeCertId];
+                const s_isSignedOff = !!s_currentSignoff;
+
+                const isReady = s_theoCount === totalModules && s_pracCount === totalPractical && !s_isSignedOff;
+                const isExpanded = expandedStudentId === student.id;
+                
+                return (
+                  <div key={student.id} className="overflow-hidden">
+                    <div 
+                      onClick={() => setExpandedStudentId(isExpanded ? null : student.id)}
+                      className={`p-6 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors cursor-pointer ${isExpanded ? 'bg-[#302624]' : 'hover:bg-[#302624]'}`}
+                    >
+                      <div className="flex items-center gap-5">
+                        <div className="p-2 bg-[#171311] rounded-lg border border-stone-800">
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-stone-400" /> : <ChevronDown className="w-4 h-4 text-stone-400" />}
                         </div>
+                        <div>
+                          <h3 className="font-bold text-xl text-white tracking-tight">{student.id}</h3>
+                          <div className="flex items-center gap-4 mt-2">
+                            <span className="text-xs font-bold text-stone-400 uppercase tracking-wide">Theory: <span className="text-white">{s_theoCount}/{totalModules}</span></span>
+                            <span className="text-xs font-bold text-stone-400 uppercase tracking-wide">Practical: <span className="text-white">{s_pracCount}/{totalPractical}</span></span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
+                        {s_isSignedOff ? (
+                          <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#171311] text-emerald-400 text-sm font-bold border border-stone-800 shadow-inner">
+                            <CheckCircle className="w-4 h-4"/> Certified
+                          </span>
+                        ) : isReady ? (
+                          <button 
+                            onClick={() => { setSelectedStudentForSignoff(student); setAppState('signoff'); window.scrollTo(0,0); }}
+                            className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md transition-colors"
+                          >
+                            Review & Sign Off
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#171311] text-stone-500 text-sm font-bold border border-stone-800">
+                            In Progress
+                          </span>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
-                      {s_isSignedOff ? (
-                        <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#171311] text-emerald-400 text-sm font-bold border border-stone-800 shadow-inner">
-                          <CheckCircle className="w-4 h-4"/> Certified
-                        </span>
-                      ) : isReady ? (
-                        <button 
-                          onClick={() => { setSelectedStudentForSignoff(student); setAppState('signoff'); window.scrollTo(0,0); }}
-                          className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md transition-colors"
-                        >
-                          Review & Sign Off
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#171311] text-stone-500 text-sm font-bold border border-stone-800">
-                          In Progress
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {isExpanded && (
-                    <div className="p-6 sm:px-8 bg-[#171311] border-t border-stone-800 shadow-inner">
-                      
-                      {/* Overall Course Feedback Display */}
-                      {student.courseFeedback?.[activeCertId] && (
-                        <div className="mb-8 bg-[#231C1A] p-6 rounded-3xl border border-[#8B4828]/30 shadow-md relative overflow-hidden">
-                           <div className="absolute top-0 right-0 p-4 opacity-5">
-                             <MessageCircle className="w-16 h-16" />
-                           </div>
-                           <h4 className="font-bold text-[#d4b09e] text-xs uppercase tracking-widest mb-3 flex items-center gap-2 relative z-10"><MessageCircle className="w-4 h-4"/> Overall Course Feedback from Employee</h4>
-                           <p className="text-sm text-stone-200 italic font-serif leading-relaxed relative z-10">"{student.courseFeedback[activeCertId]}"</p>
-                        </div>
-                      )}
+                    {isExpanded && (
+                      <div className="p-6 sm:px-8 bg-[#171311] border-t border-stone-800 shadow-inner">
+                        
+                        {/* Overall Course Feedback Display */}
+                        {student.courseFeedback?.[activeCertId] && (
+                          <div className="mb-8 bg-[#231C1A] p-6 rounded-3xl border border-[#8B4828]/30 shadow-md relative overflow-hidden">
+                             <div className="absolute top-0 right-0 p-4 opacity-5">
+                               <MessageCircle className="w-16 h-16" />
+                             </div>
+                             <h4 className="font-bold text-[#d4b09e] text-xs uppercase tracking-widest mb-3 flex items-center gap-2 relative z-10"><MessageCircle className="w-4 h-4"/> Overall Course Feedback from Employee</h4>
+                             <p className="text-sm text-stone-200 italic font-serif leading-relaxed relative z-10">"{student.courseFeedback[activeCertId]}"</p>
+                          </div>
+                        )}
 
-                      <h4 className="font-bold text-white mb-5 flex items-center gap-2 tracking-wide">
-                        <Activity className="w-5 h-5 text-[#8B4828]"/> Module Details & Private Notes
-                      </h4>
-                      <div className="grid gap-5 md:grid-cols-2">
-                        {activeCert.modules.map(mod => {
-                          const isPassed = student.theoreticalProgress?.[mod.id] === 'passed';
-                          const stats = student.quizPerformance?.[mod.id] || { attempts: 0, mistakes: {} };
-                          
-                          const draftKey = `${student.id}_${mod.id}`;
-                          const currentDraft = supervisorDrafts[draftKey] ?? (student.supervisorComments?.[mod.id] || '');
-                          const currentPrivateDraft = supervisorPrivateDrafts[draftKey] ?? (student.supervisorPrivateNotes?.[mod.id] || '');
-                          
-                          const hasMistakes = Object.keys(stats.mistakes).length > 0;
-                          
-                          return (
-                            <div key={mod.id} className="bg-[#231C1A] p-5 rounded-2xl border border-stone-800 shadow-md flex flex-col justify-between">
-                              <div>
-                                <div className="flex justify-between items-start mb-3">
-                                  <span className="font-bold text-white text-sm pr-3 leading-snug">{mod.title}</span>
-                                  {isPassed ? (
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-900/20 text-emerald-400 uppercase tracking-wider border border-emerald-900/30 shrink-0">Passed</span>
-                                  ) : (
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-[#171311] text-stone-500 uppercase tracking-wider border border-stone-800 shrink-0">Pending</span>
-                                  )}
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-4 text-xs text-stone-400 mb-4">
-                                  <span>Quiz Attempts: <span className="font-bold text-stone-200">{stats.attempts}</span></span>
-                                  <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#d4b09e]"/> Time Spent: <span className="font-bold text-stone-200">{formatTime(student.moduleTimeSpent?.[mod.id])}</span></span>
-                                </div>
-
-                                {/* Missed Questions Display */}
-                                {hasMistakes ? (
-                                  <div className="space-y-3 mt-4 mb-4 pt-4 border-t border-stone-800/50">
-                                    <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-                                      <AlertTriangle className="w-3 h-3" /> Questions Missed on Quiz:
-                                    </p>
-                                    <ul className="space-y-3">
-                                      {Object.entries(stats.mistakes).map(([qId, count]) => {
-                                         const qText = mod.questions.find(q => q.id === qId)?.text || 'Unknown question';
-                                         return (
-                                           <li key={qId} className="text-xs flex flex-col gap-1.5 bg-[#171311] p-3.5 rounded-xl border border-rose-900/30">
-                                              <span className="text-stone-300 leading-relaxed block">{qText}</span>
-                                              <span className="text-[10px] font-bold text-rose-400 w-fit bg-rose-950/40 px-2 py-0.5 rounded border border-rose-900/50">Missed {count} times</span>
-                                           </li>
-                                         );
-                                      })}
-                                    </ul>
-                                  </div>
-                                ) : stats.attempts > 0 ? (
-                                  <div className="mt-3 mb-4 pt-3 border-t border-stone-800/50">
-                                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Passed perfectly on first try!</span>
-                                  </div>
-                                ) : null}
-
-                                {/* Public Supervisor Comments Section */}
-                                <div className="mt-auto pt-4 border-t border-stone-800/50">
-                                  <label className="text-[10px] font-bold text-[#8B4828] uppercase tracking-wider block mb-2">Leave a Note for Student:</label>
-                                  <textarea
-                                    value={currentDraft}
-                                    onChange={(e) => setSupervisorDrafts(prev => ({ ...prev, [draftKey]: e.target.value }))}
-                                    placeholder="Add feedback on this module for the student to see..."
-                                    className="w-full bg-[#171311] text-stone-300 placeholder-stone-600 border border-stone-800 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#8B4828] transition-all min-h-[70px] resize-none mb-2"
-                                  />
-                                  <button
-                                    onClick={() => handleSaveSupervisorComment(student.id, mod.id)}
-                                    className="w-full bg-[#302624] hover:bg-[#8B4828] text-white py-2.5 rounded-lg font-bold transition-colors shadow-sm text-xs flex justify-center items-center gap-2"
-                                  >
-                                    <Save className="w-3.5 h-3.5" /> Save Note for Student
-                                  </button>
-                                </div>
-
-                                {/* Private Supervisor Notes Section */}
-                                <div className="mt-4 pt-4 border-t border-stone-800/50">
-                                  <label className="text-[10px] font-bold text-stone-400 flex items-center gap-1.5 uppercase tracking-wider block mb-2">
-                                    <Lock className="w-3 h-3"/> Private Module Note
-                                  </label>
-                                  <textarea
-                                    value={currentPrivateDraft}
-                                    onChange={(e) => setSupervisorPrivateDrafts(prev => ({ ...prev, [draftKey]: e.target.value }))}
-                                    placeholder="Add private evaluation notes on this module..."
-                                    className="w-full bg-[#171311] text-stone-300 placeholder-stone-600 border border-stone-800 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-stone-500 transition-all min-h-[70px] resize-none mb-2"
-                                  />
-                                  <button
-                                    onClick={() => handleSaveSupervisorPrivateNote(student.id, mod.id)}
-                                    className="w-full bg-[#171311] border border-stone-800 hover:border-stone-500 text-stone-400 hover:text-white py-2.5 rounded-lg font-bold transition-colors shadow-sm text-xs flex justify-center items-center gap-2"
-                                  >
-                                    <Save className="w-3.5 h-3.5" /> Save Private Note
-                                  </button>
-                                </div>
-
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-
-                      {/* Practical Tasks Evaluation (Supervisor Side) */}
-                      <h4 className="font-bold text-white mb-5 mt-8 flex items-center gap-2 tracking-wide">
-                        <CheckSquare className="w-5 h-5 text-[#8B4828]"/> Practical Tasks Evaluation
-                      </h4>
-                      <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-md">
-                        <div className="flex items-center justify-between mb-5">
-                          <p className="text-xs text-stone-400">Check off items as the employee demonstrates competency.</p>
-                          <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#171311] text-stone-300 border border-stone-800">
-                            {s_pracCount} / {totalPractical}
-                          </span>
-                        </div>
-                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                          {activeCert.practical.map((item) => {
-                            const isChecked = (student.practicalChecklist || {})[item.id] === true;
+                        <h4 className="font-bold text-white mb-5 flex items-center gap-2 tracking-wide">
+                          <Activity className="w-5 h-5 text-[#8B4828]"/> Module Details & Private Notes
+                        </h4>
+                        <div className="grid gap-5 md:grid-cols-2">
+                          {activeCert.modules.map(mod => {
+                            const isPassed = student.theoreticalProgress?.[mod.id] === 'passed';
+                            const stats = student.quizPerformance?.[mod.id] || { attempts: 0, mistakes: {} };
+                            
+                            const draftKey = `${student.id}_${mod.id}`;
+                            const currentDraft = supervisorDrafts[draftKey] ?? (student.supervisorComments?.[mod.id] || '');
+                            const currentPrivateDraft = supervisorPrivateDrafts[draftKey] ?? (student.supervisorPrivateNotes?.[mod.id] || '');
+                            
+                            const hasMistakes = Object.keys(stats.mistakes).length > 0;
+                            
                             return (
-                              <label key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all ${s_isSignedOff ? 'opacity-50 cursor-default' : 'cursor-pointer'} ${isChecked ? 'bg-[#171311] border-[#8B4828]/50' : 'bg-[#171311] border-stone-800 hover:border-stone-700'}`}>
-                                <div className="pt-0.5">
-                                  <input 
-                                    type="checkbox" 
-                                    className="w-4 h-4 text-[#8B4828] bg-[#231C1A] rounded border-stone-700 focus:ring-[#8B4828] focus:ring-offset-[#171311]" 
-                                    checked={isChecked}
-                                    onChange={() => handleTogglePractical(student.id, item.id, student.practicalChecklist || {}, s_isSignedOff)}
-                                    disabled={s_isSignedOff}
-                                  />
+                              <div key={mod.id} className="bg-[#231C1A] p-5 rounded-2xl border border-stone-800 shadow-md flex flex-col justify-between">
+                                <div>
+                                  <div className="flex justify-between items-start mb-3">
+                                    <span className="font-bold text-white text-sm pr-3 leading-snug">{mod.title}</span>
+                                    {isPassed ? (
+                                      <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-900/20 text-emerald-400 uppercase tracking-wider border border-emerald-900/30 shrink-0">Passed</span>
+                                    ) : (
+                                      <span className="text-[10px] font-bold px-2 py-1 rounded bg-[#171311] text-stone-500 uppercase tracking-wider border border-stone-800 shrink-0">Pending</span>
+                                    )}
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-4 text-xs text-stone-400 mb-4">
+                                    <span>Quiz Attempts: <span className="font-bold text-stone-200">{stats.attempts}</span></span>
+                                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#d4b09e]"/> Time Spent: <span className="font-bold text-stone-200">{formatTime(student.moduleTimeSpent?.[mod.id])}</span></span>
+                                  </div>
+
+                                  {/* Missed Questions Display */}
+                                  {hasMistakes ? (
+                                    <div className="space-y-3 mt-4 mb-4 pt-4 border-t border-stone-800/50">
+                                      <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                                        <AlertTriangle className="w-3 h-3" /> Questions Missed on Quiz:
+                                      </p>
+                                      <ul className="space-y-3">
+                                        {Object.entries(stats.mistakes).map(([qId, count]) => {
+                                           const qText = mod.questions.find(q => q.id === qId)?.text || 'Unknown question';
+                                           return (
+                                             <li key={qId} className="text-xs flex flex-col gap-1.5 bg-[#171311] p-3.5 rounded-xl border border-rose-900/30">
+                                                <span className="text-stone-300 leading-relaxed block">{qText}</span>
+                                                <span className="text-[10px] font-bold text-rose-400 w-fit bg-rose-950/40 px-2 py-0.5 rounded border border-rose-900/50">Missed {count} times</span>
+                                             </li>
+                                           );
+                                        })}
+                                      </ul>
+                                    </div>
+                                  ) : stats.attempts > 0 ? (
+                                    <div className="mt-3 mb-4 pt-3 border-t border-stone-800/50">
+                                      <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Passed perfectly on first try!</span>
+                                    </div>
+                                  ) : null}
+
+                                  {/* Public Supervisor Comments Section */}
+                                  <div className="mt-auto pt-4 border-t border-stone-800/50">
+                                    <label className="text-[10px] font-bold text-[#8B4828] uppercase tracking-wider block mb-2">Leave a Note for Student:</label>
+                                    <textarea
+                                      value={currentDraft}
+                                      onChange={(e) => setSupervisorDrafts(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                      placeholder="Add feedback on this module for the student to see..."
+                                      className="w-full bg-[#171311] text-stone-300 placeholder-stone-600 border border-stone-800 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#8B4828] transition-all min-h-[70px] resize-none mb-2"
+                                    />
+                                    <button
+                                      onClick={() => handleSaveSupervisorComment(student.id, mod.id)}
+                                      className="w-full bg-[#302624] hover:bg-[#8B4828] text-white py-2.5 rounded-lg font-bold transition-colors shadow-sm text-xs flex justify-center items-center gap-2"
+                                    >
+                                      <Save className="w-3.5 h-3.5" /> Save Note for Student
+                                    </button>
+                                  </div>
+
+                                  {/* Private Supervisor Notes Section */}
+                                  <div className="mt-4 pt-4 border-t border-stone-800/50">
+                                    <label className="text-[10px] font-bold text-stone-400 flex items-center gap-1.5 uppercase tracking-wider block mb-2">
+                                      <Lock className="w-3 h-3"/> Private Module Note
+                                    </label>
+                                    <textarea
+                                      value={currentPrivateDraft}
+                                      onChange={(e) => setSupervisorPrivateDrafts(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                      placeholder="Add private evaluation notes on this module..."
+                                      className="w-full bg-[#171311] text-stone-300 placeholder-stone-600 border border-stone-800 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-stone-500 transition-all min-h-[70px] resize-none mb-2"
+                                    />
+                                    <button
+                                      onClick={() => handleSaveSupervisorPrivateNote(student.id, mod.id)}
+                                      className="w-full bg-[#171311] border border-stone-800 hover:border-stone-500 text-stone-400 hover:text-white py-2.5 rounded-lg font-bold transition-colors shadow-sm text-xs flex justify-center items-center gap-2"
+                                    >
+                                      <Save className="w-3.5 h-3.5" /> Save Private Note
+                                    </button>
+                                  </div>
+
                                 </div>
-                                <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
-                              </label>
-                            );
+                              </div>
+                            )
                           })}
                         </div>
-                      </div>
 
-                      {/* Overall Supervisor Notes Section */}
-                      <div className="mt-8 bg-[#231C1A] p-6 rounded-3xl border border-stone-800 shadow-md">
-                         <h4 className="font-bold text-[#d4b09e] text-sm uppercase tracking-widest mb-1 flex items-center gap-2">
-                           <Lock className="w-4 h-4"/> Overall Private Evaluation Notes
-                         </h4>
-                         <p className="text-xs text-stone-400 mb-4">These notes are strictly for management evaluation and will not be visible to the employee.</p>
-                         
-                         <textarea
-                           value={supervisorOverallDrafts[`${student.id}_${activeCertId}`] ?? (student.supervisorOverallNotes?.[activeCertId] || '')}
-                           onChange={(e) => setSupervisorOverallDrafts(prev => ({ ...prev, [`${student.id}_${activeCertId}`]: e.target.value }))}
-                           placeholder="Add overall performance evaluation or private notes..."
-                           className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#d4b09e] transition-all min-h-[100px] resize-none mb-4"
-                         />
-                         <button
-                           onClick={() => handleSaveSupervisorOverallNote(student.id, activeCertId)}
-                           className="w-fit bg-[#302624] hover:bg-stone-600 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-sm text-sm flex justify-center items-center gap-2"
-                         >
-                           <Save className="w-4 h-4" /> Save Overall Private Note
-                         </button>
-                      </div>
+                        {/* Practical Tasks Evaluation (Supervisor Side) */}
+                        <h4 className="font-bold text-white mb-5 mt-8 flex items-center gap-2 tracking-wide">
+                          <CheckSquare className="w-5 h-5 text-[#8B4828]"/> Practical Tasks Evaluation
+                        </h4>
+                        <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-md">
+                          <div className="flex items-center justify-between mb-5">
+                            <p className="text-xs text-stone-400">Check off items as the employee demonstrates competency.</p>
+                            <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#171311] text-stone-300 border border-stone-800">
+                              {s_pracCount} / {totalPractical}
+                            </span>
+                          </div>
+                          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            {activeCert.practical.map((item) => {
+                              const isChecked = (student.practicalChecklist || {})[item.id] === true;
+                              return (
+                                <label key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all ${s_isSignedOff ? 'opacity-50 cursor-default' : 'cursor-pointer'} ${isChecked ? 'bg-[#171311] border-[#8B4828]/50' : 'bg-[#171311] border-stone-800 hover:border-stone-700'}`}>
+                                  <div className="pt-0.5">
+                                    <input 
+                                      type="checkbox" 
+                                      className="w-4 h-4 text-[#8B4828] bg-[#231C1A] rounded border-stone-700 focus:ring-[#8B4828] focus:ring-offset-[#171311]" 
+                                      checked={isChecked}
+                                      onChange={() => handleTogglePractical(student.id, item.id, student.practicalChecklist || {}, s_isSignedOff)}
+                                      disabled={s_isSignedOff}
+                                    />
+                                  </div>
+                                  <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
 
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
+                        {/* Overall Supervisor Notes Section */}
+                        <div className="mt-8 bg-[#231C1A] p-6 rounded-3xl border border-stone-800 shadow-md">
+                           <h4 className="font-bold text-[#d4b09e] text-sm uppercase tracking-widest mb-1 flex items-center gap-2">
+                             <Lock className="w-4 h-4"/> Overall Private Evaluation Notes
+                           </h4>
+                           <p className="text-xs text-stone-400 mb-4">These notes are strictly for management evaluation and will not be visible to the employee.</p>
+                           
+                           <textarea
+                             value={supervisorOverallDrafts[`${student.id}_${activeCertId}`] ?? (student.supervisorOverallNotes?.[activeCertId] || '')}
+                             onChange={(e) => setSupervisorOverallDrafts(prev => ({ ...prev, [`${student.id}_${activeCertId}`]: e.target.value }))}
+                             placeholder="Add overall performance evaluation or private notes..."
+                             className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#d4b09e] transition-all min-h-[100px] resize-none mb-4"
+                           />
+                           <button
+                             onClick={() => handleSaveSupervisorOverallNote(student.id, activeCertId)}
+                             className="w-fit bg-[#302624] hover:bg-stone-600 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-sm text-sm flex justify-center items-center gap-2"
+                           >
+                             <Save className="w-4 h-4" /> Save Overall Private Note
+                           </button>
+                        </div>
+
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderSupervisorSignoff = () => {
     if (!selectedStudentForSignoff) return null;
@@ -2226,11 +2441,13 @@ export default function App() {
   };
 
   const renderCertificate = () => {
-    // ... logic remains identical
     return (
       <div className="max-w-4xl mx-auto space-y-6 mt-8">
         <div className="flex justify-between items-center print:hidden px-4">
-          <button onClick={() => setAppState('student-dash')} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors">
+          <button onClick={() => {
+             if (currentUser.role === 'supervisor') setAppState('supervisor-dash');
+             else setAppState('student-dash');
+          }} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </button>
           <button onClick={() => window.print()} className="bg-white hover:bg-stone-200 text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm">
