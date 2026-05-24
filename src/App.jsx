@@ -1193,17 +1193,25 @@ export default function App() {
   };
 
   const saveTimeSpent = async (secondsToAdd) => {
-    if (!currentUser || !db || !activeModuleId) return;
+    if (!currentUser || !activeModuleId) return;
     const currentSpent = studentData.moduleTimeSpent?.[activeModuleId] || 0;
     const newTotal = currentSpent + secondsToAdd;
 
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
-    try {
-      await updateDoc(docRef, {
-        [`moduleTimeSpent.${activeModuleId}`]: newTotal
-      });
-    } catch (e) { 
-      console.error("Error saving time tracking", e); 
+    // Optimistic UI Update
+    setStudentData(prev => ({
+      ...prev,
+      moduleTimeSpent: { ...prev.moduleTimeSpent, [activeModuleId]: newTotal }
+    }));
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
+      try {
+        await updateDoc(docRef, {
+          [`moduleTimeSpent.${activeModuleId}`]: newTotal
+        });
+      } catch (e) { 
+        console.error("Error saving time tracking", e); 
+      }
     }
   };
 
@@ -1242,7 +1250,7 @@ export default function App() {
   };
 
   const handleSubmitQuiz = async () => {
-    if (!currentUser || !db || !firebaseUser) return;
+    if (!currentUser) return; // Removed strict Firebase dependency to allow local execution
     if (Object.keys(answers).length < activeModule.questions.length) {
       setQuizError("Please answer all questions before checking your results.");
       return;
@@ -1255,7 +1263,6 @@ export default function App() {
     const allCorrect = wrongQuestionIds.length === 0;
     setQuizState({ submitted: true, passed: allCorrect });
 
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
     const currentStats = studentData.quizPerformance?.[activeModuleId] || { attempts: 0, mistakes: {} };
     const newAttempts = currentStats.attempts + 1;
     const newMistakes = { ...currentStats.mistakes };
@@ -1264,37 +1271,43 @@ export default function App() {
        newMistakes[id] = (newMistakes[id] || 0) + 1;
     });
 
-    const updates = {
-      [`quizPerformance.${activeModuleId}`]: {
-         attempts: newAttempts,
-         mistakes: newMistakes
+    // 1. Instantly update local UI so the app functions regardless of Firebase status
+    setStudentData(prev => ({
+      ...prev,
+      theoreticalProgress: { 
+         ...prev.theoreticalProgress, 
+         ...(allCorrect ? { [activeModuleId]: 'passed' } : {}) 
+      },
+      quizPerformance: {
+         ...prev.quizPerformance,
+         [activeModuleId]: { attempts: newAttempts, mistakes: newMistakes }
       }
-    };
+    }));
 
-    if (allCorrect) {
-      updates[`theoreticalProgress.${activeModuleId}`] = 'passed';
-    }
-
-    try {
-      await updateDoc(docRef, updates);
-      setStudentData(prev => ({
-        ...prev,
-        theoreticalProgress: { 
-           ...prev.theoreticalProgress, 
-           ...(allCorrect ? { [activeModuleId]: 'passed' } : {}) 
-        },
-        quizPerformance: {
-           ...prev.quizPerformance,
-           [activeModuleId]: { attempts: newAttempts, mistakes: newMistakes }
+    // 2. Sync to Firebase if available
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
+      const updates = {
+        [`quizPerformance.${activeModuleId}`]: {
+           attempts: newAttempts,
+           mistakes: newMistakes
         }
-      }));
-    } catch (err) {
-      console.error("Error saving progress", err);
+      };
+
+      if (allCorrect) {
+        updates[`theoreticalProgress.${activeModuleId}`] = 'passed';
+      }
+
+      try {
+        await updateDoc(docRef, updates);
+      } catch (err) {
+        console.error("Error saving progress to Firebase", err);
+      }
     }
   };
 
   const handleSaveCourseFeedback = async () => {
-    if (!currentUser || !db || !firebaseUser) return;
+    if (!currentUser) return;
     setIsSavingCourseFeedback(true);
     
     const quotes = [
@@ -1325,99 +1338,144 @@ export default function App() {
       "Keep your face always toward the sunshine—and shadows will fall behind you. — Walt Whitman"
     ];
     
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
-    try {
-      await updateDoc(docRef, {
-        [`courseFeedback.${activeCertId}`]: courseFeedbackText
-      });
-      setTimeout(() => {
-        setCourseFeedbackQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-        setIsSavingCourseFeedback(false);
-        setShowCourseFeedbackSuccess(true);
-      }, 600);
-    } catch (err) {
-      console.error("Error saving feedback", err);
-      setIsSavingCourseFeedback(false);
+    // Optimistic UI Update
+    setStudentData(prev => ({
+      ...prev,
+      courseFeedback: { ...prev.courseFeedback, [activeCertId]: courseFeedbackText }
+    }));
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
+      try {
+        await updateDoc(docRef, {
+          [`courseFeedback.${activeCertId}`]: courseFeedbackText
+        });
+      } catch (err) {
+        console.error("Error saving feedback", err);
+      }
     }
+
+    setTimeout(() => {
+      setCourseFeedbackQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+      setIsSavingCourseFeedback(false);
+      setShowCourseFeedbackSuccess(true);
+    }, 600);
   };
 
   const handleSaveSupervisorComment = async (studentId, moduleId) => {
-    if (!currentUser || !db || !firebaseUser) return;
+    if (!currentUser) return;
     const draftKey = `${studentId}_${moduleId}`;
     const textToSave = supervisorDrafts[draftKey] || '';
     
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
-    try {
-      await updateDoc(docRef, {
-        [`supervisorComments.${moduleId}`]: textToSave
-      });
-    } catch (err) {
-      console.error("Error saving supervisor comment", err);
+    // Optimistic UI Update
+    setAllStudents(prev => prev.map(s => 
+      s.id === studentId ? { ...s, supervisorComments: { ...s.supervisorComments, [moduleId]: textToSave } } : s
+    ));
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+      try {
+        await updateDoc(docRef, {
+          [`supervisorComments.${moduleId}`]: textToSave
+        });
+      } catch (err) {
+        console.error("Error saving supervisor comment", err);
+      }
     }
   };
 
   const handleSaveSupervisorPrivateNote = async (studentId, moduleId) => {
-    if (!currentUser || !db || !firebaseUser) return;
+    if (!currentUser) return;
     const draftKey = `${studentId}_${moduleId}`;
     const textToSave = supervisorPrivateDrafts[draftKey] || '';
     
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
-    try {
-      await updateDoc(docRef, {
-        [`supervisorPrivateNotes.${moduleId}`]: textToSave
-      });
-    } catch (err) {
-      console.error("Error saving supervisor private note", err);
+    // Optimistic UI Update
+    setAllStudents(prev => prev.map(s => 
+      s.id === studentId ? { ...s, supervisorPrivateNotes: { ...s.supervisorPrivateNotes, [moduleId]: textToSave } } : s
+    ));
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+      try {
+        await updateDoc(docRef, {
+          [`supervisorPrivateNotes.${moduleId}`]: textToSave
+        });
+      } catch (err) {
+        console.error("Error saving supervisor private note", err);
+      }
     }
   };
 
   const handleSaveSupervisorOverallNote = async (studentId, certId) => {
-    if (!currentUser || !db || !firebaseUser) return;
+    if (!currentUser) return;
     const draftKey = `${studentId}_${certId}`;
     const textToSave = supervisorOverallDrafts[draftKey] || '';
     
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
-    try {
-      await updateDoc(docRef, {
-        [`supervisorOverallNotes.${certId}`]: textToSave
-      });
-    } catch (err) {
-      console.error("Error saving overall supervisor note", err);
+    // Optimistic UI Update
+    setAllStudents(prev => prev.map(s => 
+      s.id === studentId ? { ...s, supervisorOverallNotes: { ...s.supervisorOverallNotes, [certId]: textToSave } } : s
+    ));
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+      try {
+        await updateDoc(docRef, {
+          [`supervisorOverallNotes.${certId}`]: textToSave
+        });
+      } catch (err) {
+        console.error("Error saving overall supervisor note", err);
+      }
     }
   };
 
   const handleTogglePractical = async (studentId, itemId, currentChecklist, isSignedOffForStudent) => {
-    if (isSignedOffForStudent) return; 
-    if (!currentUser || !db || !firebaseUser) return;
+    if (isSignedOffForStudent || !currentUser) return; 
     
     const newValue = !currentChecklist[itemId];
     
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
-    try {
-      await updateDoc(docRef, {
-        [`practicalChecklist.${itemId}`]: newValue
-      });
-    } catch (err) {
-      console.error("Error saving practical item", err);
+    // Optimistic UI Update
+    setAllStudents(prev => prev.map(s => 
+      s.id === studentId ? { ...s, practicalChecklist: { ...s.practicalChecklist, [itemId]: newValue } } : s
+    ));
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+      try {
+        await updateDoc(docRef, {
+          [`practicalChecklist.${itemId}`]: newValue
+        });
+      } catch (err) {
+        console.error("Error saving practical item", err);
+      }
     }
   };
 
   const handleSupervisorSignoff = async () => {
-    if (!currentUser || !db || !firebaseUser || !selectedStudentForSignoff) return;
+    if (!currentUser || !selectedStudentForSignoff) return;
     
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', selectedStudentForSignoff.id);
-    try {
-      await updateDoc(docRef, {
-        [`signoffs.${activeCertId}`]: {
-          status: true,
-          by: currentUser.name,
-          at: new Date().toISOString()
-        }
-      });
-      setAppState('supervisor-dash');
-      setSelectedStudentForSignoff(null);
-    } catch (err) {
-      console.error("Error signing off", err);
+    const signoffData = {
+      status: true,
+      by: currentUser.name,
+      at: new Date().toISOString()
+    };
+
+    // Optimistic UI Update
+    setAllStudents(prev => prev.map(s => 
+      s.id === selectedStudentForSignoff.id ? { ...s, signoffs: { ...s.signoffs, [activeCertId]: signoffData } } : s
+    ));
+
+    setAppState('supervisor-dash');
+    setSelectedStudentForSignoff(null);
+
+    if (db && firebaseUser) {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', selectedStudentForSignoff.id);
+      try {
+        await updateDoc(docRef, {
+          [`signoffs.${activeCertId}`]: signoffData
+        });
+      } catch (err) {
+        console.error("Error signing off", err);
+      }
     }
   };
 
