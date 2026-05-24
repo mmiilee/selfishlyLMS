@@ -24,13 +24,19 @@ const myFirebaseConfig = {
   measurementId: "G-D7JFHNZGZS"
 };
 
-let app, auth, db, appId;
+let app, auth, db;
+
 try {
-  // Use the preview config if in Canvas, otherwise use YOUR real config for Vercel
-  const configToUse = typeof __firebase_config !== 'undefined' && Object.keys(JSON.parse(__firebase_config)).length > 0 
-    ? JSON.parse(__firebase_config) 
-    : myFirebaseConfig;
-    
+  let configToUse;
+  try {
+    const injected = window.__firebase_config;
+    configToUse = (injected && Object.keys(JSON.parse(injected)).length > 0)
+      ? JSON.parse(injected)
+      : myFirebaseConfig;
+  } catch {
+    configToUse = myFirebaseConfig;
+  }
+
   app = initializeApp(configToUse);
   auth = getAuth(app);
   db = getFirestore(app);
@@ -38,8 +44,7 @@ try {
   console.warn("Firebase not initialized. Running in local mode.");
 }
 
-// A unique identifier for your LMS data path.
-appId = typeof __app_id !== 'undefined' ? __app_id : 'selfishly-lms-v1'; 
+const appId = (typeof window !== 'undefined' && window.__app_id) ? window.__app_id : 'selfishly-lms-v1';
 
 // 🔒 CHANGE THIS TO YOUR CLINIC'S SECRET SUPERVISOR PIN 🔒
 const SUPERVISOR_ACCESS_PIN = "2790";
@@ -1072,13 +1077,14 @@ export default function App() {
     if (!auth) return;
     const initAuth = async () => {
       try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
+        if (window.__initial_auth_token) {
+          await signInWithCustomToken(auth, window.__initial_auth_token);
         } else {
           await signInAnonymously(auth);
         }
       } catch (err) {
         console.error("Auth error", err);
+        try { await signInAnonymously(auth); } catch {}
       }
     };
     initAuth();
