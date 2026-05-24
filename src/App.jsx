@@ -4,7 +4,7 @@ import {
   Award, ArrowRight, ArrowLeft, Activity, UserCheck, FileSignature, 
   Zap, MessageCircle, AlertOctagon, Smile, Frown, ClipboardList,
   User, CheckSquare, Printer, Users, LogOut, ChevronDown, ChevronUp, Sparkles,
-  LayoutDashboard, GraduationCap, HelpCircle, Play, Search, X, ChevronRight
+  LayoutDashboard, GraduationCap, HelpCircle, Play, Search, X, ChevronRight, Save, Lock, Clock
 } from 'lucide-react';
 
 // --- FIREBASE SETUP ---
@@ -43,6 +43,17 @@ appId = typeof __app_id !== 'undefined' ? __app_id : 'selfishly-lms-v1';
 
 // 🔒 CHANGE THIS TO YOUR CLINIC'S SECRET SUPERVISOR PIN 🔒
 const SUPERVISOR_ACCESS_PIN = "2790";
+
+// --- CUSTOM HELPER FUNCTIONS ---
+const formatTime = (totalSeconds) => {
+  if (!totalSeconds) return "0m 0s";
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m === 0) return `${s}s`;
+  return `${m}m ${s}s`;
+};
 
 // --- CUSTOM LUXE COLORS ---
 const BRAND_BROWN = "#8B4828";
@@ -412,21 +423,34 @@ const TATTOO_MODULES = [
     track: "Advanced Devices",
     duration: "45 min",
     content: `
-      **The Nature of Tattoo Ink & Macrophages**
-      Tattoos are made of incredibly tiny ink particles—often around 40 to 100 nanometers in size. When injected into the skin, these particles clump together. While the body's immune system can clear tiny, individual particles, it cannot remove these massive clumps. The body then encapsulates the clumps within *dermal macrophages* (essentially acting as prison cells, holding the ink in place).
+      **A Quick History Fact!**
+      Modern, scar-free laser tattoo removal was actually discovered by accident! In 1980, researchers at a hospital in Glasgow, Scotland originally wanted to use lasers to treat pediatric port wine stains. To gain some experience and practice using lasers safely on human skin first, they decided to test a Q-switched ruby laser on tattoos. It worked so incredibly well that it accidentally launched the entire modern tattoo removal industry! By 1988, the first dedicated clinic opened, and in 1991, the DermaLase DLR-1 gained FDA approval as the world's first commercial Q-switched tattoo removal laser.
+
+      **Key Physics Concepts to Know**
+      • **Chromophores:** Target structures (in this case, ink particles or aggregates) that absorb incoming light energy and heat up.
+      • **Absorption:** When a photon of light interacts with an electron, the photon's energy is "taken" by the electron.
+      • **Scattering:** If an electron absorbs a photon's energy but falls back into its orbit, it releases the energy as a new, scattered photon. 
+      • **Photomechanical Reaction:** In laser tattoo removal, we are not trying to induce a pure thermal (heat) reaction; we are inducing a *photomechanical* (photoacoustic) reaction to aggressively fragment the ink.
+
+      **The Nature of Tattoo Ink, Phagocytosis & Fibroblasts**
+      When tattoo ink is introduced into the skin, it is pushed into the dermis using needles. This needle trauma triggers an immune response called **phagocytosis**, generating a raft of macrophages, fibroblasts, and mast cells to "attack" the invader. 
+      Macrophages attempt to carry the ink particles away to the lymph nodes. However, the fibroblasts and mast cells do not remove the ink—they merely "engorge" it and stay permanently fixed within the connective tissue of the dermis. Because of the initial needle trauma and the encapsulated ink, a tattoo is literally just a *damaged piece of skin laden with ink particles*.
+
+      **The Basic Overview: Shattering, Not Burning**
+      Many patients think that tattoo removal involves a “burning off” of the tattoo. This simply isn’t the case. **The laser does not remove the tattoo—the body does.** The laser merely 'accelerates' the removal process. A tattoo might naturally be completely removed by the body over 300 to 400 years; the laser just speeds that up!
+      
+      💡 *Pro Pearl: It is an Immunological Treatment*
+      Veteran providers will tell you: adopting the mindset that the body does the actual removal changes everything. It encourages less aggressive fluences, longer patient intervals, and far better long-term skin preservation.
 
       **The Macrophage Steam Explosion (Photoacoustic Effect)**
-      Because these particles are so tiny, they lose heat extremely quickly (short thermal relaxation time). When you hit them with a laser, the particles absorb energy and heat up, passing that heat to the surrounding tissue water inside the macrophage. 
-      When water turns to steam, its volume expands massively (by a factor of about 2,000). The macrophage cannot withstand the pressure from this steam formation, causing it to explode! The explosive force sends the ink particles flying out in all directions, turning them into microscopic fragments that the lymphatic system can now easily wash away. This is the **photoacoustic effect**.
+      Because these particles are so tiny, they lose heat extremely quickly. When you hit them with a laser, the particles absorb energy, passing that heat to the surrounding tissue water inside the macrophage. When water turns to steam, its volume expands massively (by a factor of about 2,000). The macrophage cannot withstand the pressure, causing it to explode! The explosive force sends the ink particles flying out in all directions, turning them into microscopic fragments.
 
-      **Why Pulse Duration Matters**
-      If your laser pulse is too long (like a **millisecond** laser), the ink particles lose too much heat before the temperature rises enough to create steam. The process is too gentle, heat is lost as fast as it comes in, and no explosion occurs. You must deliver energy in an incredibly short burst to achieve the temperature rise needed.
+      **Why Pulse Duration Matters (Milliseconds vs. Nanoseconds)**
+      Hair removal lasers fire in **milliseconds**. The heat dissipates into the skin and cools quickly enough that it doesn’t burn the skin. This must NOT be used for tattoos because the metallics in ink would not allow the heat to dissipate, causing severe burns. Instead, tattoo removal technicians use lasers with a pulse delivery of a billionth (nanosecond) or trillionth (picosecond) of a second. 
 
-      **The Nano vs. Pico Debate**
-      Marketing from laser companies pushes picosecond lasers as the ultimate devices. While picosecond lasers are fabulous tools (especially for notoriously difficult colors like blues, greens, or yellows), there is an unspoken truth: **Picosecond lasers are terrible for dense, saturated black tattoo removal.**
-      • **Nanosecond (Q-Switched):** The M22 operates in nanoseconds (6-8 ns). Nanosecond pulses produce a balanced photothermal (heat) and photoacoustic (shockwave) effect.
-      • **Picosecond:** Fires up to a hundred times shorter, shifting almost entirely to photoacoustic pressure with very little heat deposited.
-      When you have a highly saturated, dense black tattoo, the thermal heat provided by a nanosecond laser is *required* to create a stronger shattering effect. A dark black tattoo that might take 8-10 sessions with a nanosecond laser could easily take 15-20 frustrating sessions with a picosecond device. Black ink makes up 90% of tattoos; a Q-Switched nanosecond laser is the premier tool for breaking it down.
+      **The Nano vs. Pico Debate (Why We Use the M22)**
+      Marketing pushes picosecond lasers as the ultimate devices. While picosecond lasers are fabulous tools for notoriously difficult colors (blues, greens), there is an unspoken truth: **Picosecond lasers are often terrible for dense, saturated black tattoo removal.**
+      At our clinic, we exclusively use the M22 Q-Switched nanosecond laser. When you have a highly saturated, dense black tattoo (which makes up 90% of all tattoos), the thermal heat provided by a nanosecond laser is *required* to create a stronger shattering effect. This is why the M22 is our premier tool of choice.
     `,
     questions: [
       {
@@ -442,10 +466,14 @@ const TATTOO_MODULES = [
       },
       {
         id: 'tat-1-2',
-        text: "Millisecond pulse durations are effective for tattoo removal.",
-        options: ["True", "False"],
+        text: "According to the physics definitions provided, what is the primary reaction we are trying to induce during laser tattoo removal?",
+        options: [
+          "A pure thermal reaction to melt the ink.",
+          "A photomechanical (photoacoustic) reaction to fragment the ink aggregates.",
+          "A scattering reaction to reflect the ink."
+        ],
         correctIndex: 1,
-        explanation: "False! Millisecond pulses are far too long. The heat dissipates before steam can form, meaning no explosive (photoacoustic) reaction occurs to shatter the ink."
+        explanation: "We rely on the photomechanical/photoacoustic shockwave to physically shatter the ink aggregates, rather than just melting them with pure heat."
       },
       {
         id: 'tat-1-3',
@@ -468,33 +496,36 @@ const TATTOO_MODULES = [
     track: "Advanced Devices",
     duration: "55 min",
     content: `
-      **The Four Physical Variables**
-      Every laser treatment comes down to a few physical variables. These aren’t arbitrary dial positions. Each one directly controls energy delivery to ink particles and the tissue around them. 
+      **The Physical Variables**
+      Every laser treatment comes down to physical variables. These aren’t arbitrary dial positions. Each one directly controls energy delivery. 
 
-      **1. Fluence: Energy Density**
-      Fluence is energy density — defined as the energy per unit area, typically measured in Joules per square centimeter (J/cm²). That number tells you the total dose hitting each square centimeter of skin with every pulse. If the fluence is too low, particles won’t absorb enough energy to break apart. Too high, and you risk damage.
+      **1. Fluence & Power Density**
+      Fluence is energy density (Joules per square centimeter - J/cm²). **Power Density** is just like energy density, except it includes the *pulse duration*. It describes the amount of energy concentrated into a spot diameter being delivered *in that specific fraction of a second*. 
+
+      💡 *Pro Pearl: Don't Chase Maximum Power*
+      One of the biggest beginner mistakes is over-fluencing. Effective fragmentation is always greater than epidermal injury. You want a crisp frost, not charred skin. Many advanced providers purposely stay conservative and do more passes over time rather than "nuking" the tattoo, which can create scarring, hypopigmentation, and paradoxically delayed healing.
 
       **2. Spot Size Changes Everything (The Inverse Square Law)**
-      Here’s what catches many off guard: if you keep your laser’s energy the same but dial down the spot size, your fluence shoots up. You’re packing identical energy into a much smaller area. 
-      The relationship follows an inverse square law — **if you halve the spot diameter while keeping the laser's energy constant, the fluence roughly quadruples.** That’s why spot size and fluence are inseparable. 
+      If you halve the spot diameter while keeping the laser's energy constant, the fluence roughly quadruples. Because of the inverse square law, you must **NEVER "pull away" the handpiece from the skin surface while firing!** Pulling away shrinks the spot diameter hitting the skin, skyrocketing the fluence and causing irreversible burn damage. Keep the tip perpendicular and steady!
 
-      **Spot Size Selection on the M22**
-      The M22 offers 7 tip sizes (from 2.0mm to 8.0mm). 
-      *Rule of Thumb:* **Larger tip sizes penetrate deeper and deliver less surface fluence.** Larger spot sizes are more suited for:
-      1. Higher densities of pigment/tattoo ink.
-      2. Darker skin types.
-      3. Sensitive body areas.
-      From session to session, as the dark tattoo becomes lighter, reducing the spot size will increase the energy deposits to shatter the remaining stubborn pigment.
+      💡 *Pro Pearl: Larger Spots are Safer*
+      Many elite providers prefer a larger spot with a lower fluence over a tiny spot with high energy. Larger spot sizes penetrate more uniformly, reduce epidermal "hot spots", and scatter less. 
 
-      **3. Fluence vs. Irradiance**
-      Fluence is the *total* energy dose per area. Irradiance is the *power* per area at any moment during the pulse (the rate). To get irradiance, divide fluence by pulse duration. The instantaneous power surge drives the photoacoustic effect. Peak power indicates the mechanical shock delivered to ink.
+      **The Step-by-Step Clinical Firing Protocol**
+      This is the ideal, safe approach to determining settings on a new tattoo:
+      1. Use as **large a spot diameter** as your equipment will allow.
+      2. Keep the fluence extremely low. For ALL new tattoo treatments, start at baseline/conservative.
+      3. Fire **3 or 4 test shots** at an area of the tattoo. 
+      4. **WAIT 30-60 seconds!** You are looking for erythema (reddening) and mild edema (swelling).
+      5. If no reaction is observed after 60 seconds, increase the fluence by only 0.5 J/cm² and repeat.
+      6. **NEVER go over an area twice in the same session.** Once the first pass generates steam bubbles (frosting), those vacuoles will merely reflect much of any subsequent laser energy back out of the skin! Excessive repeated passes increase complication risk faster than they improve clearance.
+      7. **For Subsequent Sessions:** Do not drastically jump your settings! Increase the fluence slowly—by only 0.5 to 1.0 J/cm² every *two or three* sessions to account for the increasing depth of the remaining ink.
 
-      **4. Repetition Rate and Thermal Stacking**
-      Repetition rate is measured in Hertz (Hz), or pulses per second. The gap between pulses is the tissue recovery window.
-      If you fire too fast, the heat doesn’t dissipate completely. Residual heat from one pulse adds to the next. This is called **Thermal Stacking**. This cumulative heat buildup is a primary cause of unwanted thermal injury during treatment. Controlling the repetition rate prevents heat from accumulating.
-
-      **The Top-Hat Beam Profile**
-      The M22 QS Nd:YAG uses a "top-hat" beam profile. Unlike standard beams that have a dangerous "hot spot" in the center, the top-hat profile warrants a perfectly homogenous energy distribution across the entire spot. This highly minimizes epidermal damage, tissue textural changes, scarring, and dangerous blood splatter.
+      **3. Repetition Rate & Stacked Passes**
+      Repetition rate is measured in Hertz (Hz). If you fire too fast, the heat doesn’t dissipate completely, leading to **Thermal Stacking**. 
+      
+      💡 *Pro Pearl: Avoid Aggressive Pass Stacking*
+      Many providers have backed away from multi-pass methods (like the "R20 method") because stacked passes drastically increase blistering, PIH, and scarring (especially in Fitz IV-VI). A single, high-quality pass is often safer and just as effective.
     `,
     questions: [
       {
@@ -510,25 +541,25 @@ const TATTOO_MODULES = [
       },
       {
         id: 'tat-2-2',
-        text: "What is 'Thermal Stacking' in laser tattoo removal?",
+        text: "When performing test shots on a new tattoo, how long should you wait to properly observe the tissue reaction before turning up the energy?",
         options: [
-          "Stacking two different spot sizes on top of each other to increase depth.",
-          "When pulses are fired too fast (high Hertz) and residual heat from one pulse adds to the next because the tissue hasn't had time to cool.",
-          "When the ink particles stack on top of each other during the healing process."
+          "No waiting is needed; the reaction is instant.",
+          "Wait 30-60 seconds to observe for erythema and edema.",
+          "Wait 24 hours."
         ],
         correctIndex: 1,
-        explanation: "Thermal stacking occurs when the repetition rate is too fast, shrinking the tissue's recovery window. The heat builds up cumulatively and causes thermal burns."
+        explanation: "While frosting is instant, the true inflammatory response (erythema and swelling) takes 30-60 seconds to develop. Turning up the energy before waiting this duration can lead to severe overdosing."
       },
       {
         id: 'tat-2-3',
-        text: "When adjusting settings on the M22, what is true regarding larger tip sizes (e.g., 6.0mm or 8.0mm)?",
+        text: "Why should you never fire the laser over the exact same area twice during a single session?",
         options: [
-          "Larger tips penetrate shallower and deliver more fluence.",
-          "Larger tips penetrate deeper, deliver less surface fluence, and are better for higher ink densities and darker skin types.",
-          "Tip size has no effect on depth or fluence."
+          "Because the steam bubbles (vacuoles) from the first pass will simply reflect the subsequent laser energy back out of the skin, rendering it useless.",
+          "Because the machine will automatically shut down.",
+          "Because the ink becomes permanently immune to light for 24 hours."
         ],
-        correctIndex: 1,
-        explanation: "Larger tip sizes drive the energy deeper into the dermis but deliver less total surface fluence, making them the safest starting point for dense tattoos and darker skin."
+        correctIndex: 0,
+        explanation: "Firing a second pass is ineffective because the gas/steam bubbles formed by the first pass act as a mirror, and excessive repeated passes increase complication risk faster than they improve clearance."
       }
     ]
   },
@@ -536,23 +567,42 @@ const TATTOO_MODULES = [
     id: 'tat-3',
     title: "Tattoo Anatomy, Skin Types & Conditions",
     icon: <BookOpen className="w-5 h-5" />,
-    description: "Understanding tattoo typology, 1064nm vs. 532nm, and paradoxical darkening.",
+    description: "Understanding tattoo typology, 1064nm capabilities, and paradoxical darkening.",
     track: "Advanced Devices",
     duration: "40 min",
     content: `
       **Tattoo Typology & Depth**
       Tattoo dye composition is incredibly variable. The differing compositions explain why some tattoos respond favorably and others stubbornly resist.
-      • **Professional Tattoos:** Contain organometallic dyes. They are densely packed and placed deep in the dermis with a machine. Usually require 6-10 sessions.
-      • **Amateur Tattoos:** Often contain carbon-rich mixtures (like India ink or soot). They are sparse and placed irregularly, but mostly superficially. Usually require 4-6 sessions.
-      • **Traumatic Tattoos:** Result from explosions, asphalt, pencil lead, or gunpowder. *Warning:* Explosive particles may react dangerously with laser therapy, ignite, and lead to pock-like scarring. 
+      
+      💡 *Pro Pearl: Amateur vs. Dense Professional Tattoos*
+      Amateur tattoos (India ink/soot) often clear surprisingly fast with a Q-switch because there is less ink, it's more superficial, and deposition is uneven. Dense professional tattoos, however, require extreme patience. They are heavily saturated, deeply layered, and mixed with fillers. You must "chip away" slowly. Trying to blast them out in 3 sessions will cause fibrosis, which actually traps the pigment permanently!
 
-      **Wavelengths and Skin Types (1064nm vs. 532nm)**
-      The Lumenis M22 Q-Switched Nd:YAG provides two primary wavelengths for tattoo removal:
-      • **1064 nm (Near-Infrared):** Highly effective for dark inks (black, dark blue). Epidermal melanin absorbs very little energy at this wavelength, meaning it penetrates deeply and safely bypasses the surface skin. It is the mandatory choice for darker skin types (Fitzpatrick IV-VI) to prevent severe hypopigmentation (white spots).
-      • **532 nm (Green Light):** Created by passing the 1064nm beam through a KTP crystal. This wavelength is highly absorbed by red, orange, and yellow inks. *Warning:* Because 532nm is highly absorbed by melanin, it is very risky for darker Fitzpatrick skin types and can easily destroy their natural skin pigment.
+      **Clearance Rates Across the Body**
+      Many laser operators report massive variability in the rate at which tattoo ink clears across different parts of the body. One highly obvious factor is **distance from the heart**. Tattoos on the lower legs, ankles, and feet are notoriously stubborn due to poorer circulation of lymph and blood in those extremities.
 
-      **Paradoxical Darkening (Cosmetic Tattoos)**
-      Approach pink, red, and flesh-tone tattoos (such as lip liner, microblading, or cosmetic eyeliner) with extreme caution. These inks often contain iron or titanium oxide. Laser energy can cause a rapid chemical transformation of the ferric oxide into ferrous oxide. This results in **paradoxical darkening** (the ink instantly turns black), which is often highly resistant to any additional laser therapy.
+      **Colors Can Be Deceiving!**
+      We can never be entirely sure which colored inks are *actually* in any tattoo. We might see a color that appears to be "green," but it is in fact made up of yellow and blue inks mixed together. 
+      **Clinical Approach:** Because our M22 system exclusively uses the 1064nm wavelength, we are highly specialized in targeting dark pigments. If a tattoo has bright colors, 1064nm will likely not "see" them efficiently.
+
+      💡 *Pro Pearl: 1064nm is King for Black*
+      Most seasoned providers default to 1064nm first with the largest spot size possible. The larger spot size penetrates deeper and scatters less, making it highly effective and incredibly safe for black, dark blue, and charcoal inks.
+
+      **Difficulty of Removing Various Colors (For Our 1064nm System)**
+      Because our clinic strictly uses the 1064nm wavelength, colors rank as follows:
+      1. **Black, Charcoal, Dark Blue** (Easiest - Responds beautifully to 1064nm)
+      2. **Reds, Greens, Blues, Yellows** (Will NOT respond well. 1064nm targets dark pigment. Bright colors require different wavelengths like 532nm, 755nm, etc.)
+
+      **Wavelengths and Skin Types: Why We Use 1064nm**
+      • **1064 nm (Near-Infrared):** Epidermal melanin absorbs very little energy at this wavelength, meaning it penetrates deeply and safely bypasses the surface skin. It is the absolute safest and most mandatory choice for darker skin types (Fitzpatrick IV-VI). 
+      *(Note: Other clinics may use a 532nm green light for red inks. We do not use 532nm because it is highly absorbed by melanin, making it very risky for darker Fitzpatrick skin types and prone to destroying natural skin pigment.)*
+
+      **White Ink & The Paradoxical Darkening Trap**
+      Approach pink, red, and flesh-tone tattoos (lip liner, microblading, PMU) with extreme caution. **ALWAYS test spot white ink and flesh tones.** These inks often contain iron or titanium dioxide. Laser energy can cause a rapid chemical transformation (ferric oxide to ferrous oxide). This results in **paradoxical darkening**, where the ink violently oxidizes and instantly turns pitch black or gray. This blackened state is highly resistant to any additional therapy.
+
+      **Limitations of Our Q-Switched 1064nm: When to Refer Out**
+      Our clinic uses the M22 Q-Switched Nd:YAG equipped *exclusively* with the 1064nm wavelength. While this makes us the gold standard for safely treating black, dark blue, and charcoal inks on all skin types, it is not equipped for every color on the spectrum. 
+      Anything that is not a dark ink—specifically **reds, vibrant sky blues, bright greens, and bright yellows**—must be referred out to another facility. 
+      *Do not try to aggressively force these colors to fade using our 1064nm system; it will only cause unnecessary thermal damage and scarring.* Instead, refer these patients to a clinic that operates a **532nm (for reds)**, **Q-Switched Ruby (694nm)**, **Alexandrite (755nm)**, or a specific **Picosecond laser system** designed to target those highly stubborn bright pigments.
     `,
     questions: [
       {
@@ -568,6 +618,28 @@ const TATTOO_MODULES = [
       },
       {
         id: 'tat-3-2',
+        text: "Why do tattoos located on the lower legs, ankles, or feet typically take significantly more sessions to fade?",
+        options: [
+          "Because the skin on the feet is thicker and blocks the laser light.",
+          "Because of the distance from the heart; poorer blood and lymphatic circulation in the extremities drastically slows the removal of shattered ink.",
+          "Because gravity pulls the shattered ink back down into the tattoo."
+        ],
+        correctIndex: 1,
+        explanation: "The body's lymphatic system is responsible for flushing the ink away. Extremities far from the heart have slower circulation, meaning the flushing process takes much longer."
+      },
+      {
+        id: 'tat-3-3',
+        text: "If a young, healthy patient has a dense, professionally applied tattoo, why shouldn't you try to 'blast it out' aggressively in 3 sessions?",
+        options: [
+          "Aggressively over-treating dense ink will cause severe fibrosis (scarring), which will permanently trap the pigment in the skin.",
+          "The laser will run out of pulses.",
+          "The ink will dissolve too fast and enter the bloodstream all at once."
+        ],
+        correctIndex: 0,
+        explanation: "Dense professional tattoos are deeply layered. Treating them too aggressively creates heavy scar tissue. Fibrosis permanently traps the ink, ruining the chance of successful clearance."
+      },
+      {
+        id: 'tat-3-4',
         text: "Why is the 1064nm wavelength the safest and most effective choice for removing black tattoos on Fitzpatrick Type V and VI skin?",
         options: [
           "Because it is absorbed highly by epidermal melanin.",
@@ -576,6 +648,17 @@ const TATTOO_MODULES = [
         ],
         correctIndex: 2,
         explanation: "The 1064nm wavelength safely bypasses the abundant melanin in the surface of dark skin types, driving straight down to the dark tattoo ink without destroying the patient's natural pigment."
+      },
+      {
+        id: 'tat-3-5',
+        text: "A new patient comes in with a brightly colored tattoo containing reds, vibrant sky blues, and bright greens. How should you approach this treatment using our clinic's 1064nm M22 Q-Switch?",
+        options: [
+          "Use the 1064nm wavelength at maximum fluence to force the bright colors to shatter.",
+          "Recognize that our 1064nm laser targets dark inks and cannot effectively treat reds, bright blues, and greens. Refer the patient out to a clinic with 532nm, Picosecond, or Alexandrite/Ruby lasers.",
+          "Treat it normally; 1064nm removes all colors equally."
+        ],
+        correctIndex: 1,
+        explanation: "Our 1064nm system is excellent for blacks and dark blues, but struggles with bright colors like reds, blues, and greens. Attempting to force clearance will only cause scarring. It is best clinical practice to refer these specific colors out."
       }
     ]
   },
@@ -633,20 +716,38 @@ const TATTOO_MODULES = [
     track: "Guest Experience",
     duration: "25 min",
     content: `
-      **Managing Expectations**
-      Tattoo removal requires patience. Appropriate pre-treatment counseling regarding realistic expectations is of utmost importance to ensure patient satisfaction. Patients must understand that complete clearance cannot be guaranteed.
+      **The Critical Consultation**
+      The consultation is a critical part of the tattoo removal process. This is where you establish expectations, explain the physiological process, and discover if the patient has any contraindications. While most tattoo removal lasers are relatively simple to physically operate, providing proper treatment requires extensive knowledge of tattoos, skin reactions, and laser physics. Treatment settings depend entirely on a thorough assessment of the patient’s tattoo colors, skin type, and medical history.
 
       **1. "Why do I have to wait 6 to 8 weeks between sessions?"**
-      **Provider Answer:** "The laser doesn't actually remove the ink; it just shatters it into microscopic pieces. Your body's immune system (the lymphatic system) has to do the heavy lifting to flush those particles out. That biological process takes 6 to 8 weeks. Treating it sooner won't speed up the fading, it will just unnecessarily damage your skin and increase the risk of scarring."
+      **Provider Answer:** "The waiting period is actually divided into two phases. The first two weeks allow your body to heal in the treated area—this is when any temporary scabs or blisters will subside. The following weeks allow your body's immune system (the lymphatic system) the time it needs to gradually flush away the shattered ink fragments. As a general rule, the longer you wait between treatments, the better fading you will yield from each single session!"
 
       **2. "How many sessions will it take?"**
-      **Provider Answer:** "It is difficult to predict an exact number because every tattoo's depth, ink density, and chemical composition is different. Generally, amateur tattoos require 4-6 sessions, while professional tattoos usually require 6-10 sessions. You will likely see the most dramatic fading after the first couple of sessions, and slower, gradual fading toward the end."
+      **Provider Answer:** "Most patients require 5 to 10 laser treatments. This is because when a tattoo is applied, the needle inserts at varying depths, leaving ink resting in multiple layers within the dermis. Each laser treatment only shatters the most shallow layer of ink. We have to progressively work our way through successively deeper layers with each session until none remain."
 
       **3. "Does it hurt?"**
-      **Provider Answer:** "Yes, it is often described as feeling like hot bacon grease or a heavy rubber band snapping against the skin. Because the laser creates a microscopic shockwave, it is uncomfortable. However, treatments are incredibly fast (often lasting only seconds or minutes), and we use cooling systems (or numbing agents) to make it as tolerable as possible."
+      **Provider Answer:** "Yes, it is often described as feeling like hot bacon grease or a heavy rubber band snapping against the skin. Because the laser creates a microscopic shockwave, it is uncomfortable. However, treatments are incredibly fast (often lasting only seconds or minutes), and we use cooling systems to make it as tolerable as possible."
 
       **4. "Will it blister?"**
       **Provider Answer:** "Blistering is an extremely common, normal reaction within the first 24 to 48 hours after treatment. It is a sign that your body is reacting to the shattered ink and starting the healing process. We will provide you with specific aftercare instructions to manage them safely."
+
+      **5. "Why does my tattoo look darker after treatment?"**
+      **Provider Answer:** "This can be due to temporary inflammation or trapped carbonization as the ink is initially shattered. However, if your tattoo contained cosmetic ink, white ink, or flesh-tone pigments (which often contain iron oxides), this can be 'paradoxical darkening,' where the ink oxidizes and permanently turns pitch black or gray."
+
+      **6. "Can I speed up the tattoo removal process?"**
+      **Provider Answer:** "Ultimately, time is the biggest factor! However, because your healthy immune function does the actual removal, staying hydrated and exercising to boost circulation definitely helps. Conversely, smoking drastically slows removal. Please be highly cautious of 'miracle creams,' 'detox claims,' or lymphatic gimmicks sold online—they do not work."
+
+      **7. "Can tattoo removal leave scars?"**
+      **Provider Answer:** "When properly used, the laser itself is not supposed to scar the skin. However, the risk of scarring increases significantly with overtreatment, aggressive multi-pass methods, picking at your blisters, or developing an infection. It's also important to note that some existing scarring may actually be from the original tattoo application itself, which the laser will simply reveal as the ink fades."
+
+      **8. "What exactly is the white frosting?"**
+      **Provider Answer:** "That is a temporary whitening response caused by the rapid heating of intracellular water, which creates steam and vacuole formation in the skin. It usually fades within 10 to 20 minutes. It's important to know that more frosting does *not* automatically mean a better treatment!"
+
+      **9. "Why are there tiny black dots left after several sessions?"**
+      **Provider Answer:** "These dots can be residual deep pigment, highly resistant pigment particles, or trapped ink caused by microscopic scar tissue encapsulation. Sometimes, we ethically choose to stop treating before 100% clearance to preserve the overall quality and health of your skin."
+
+      **10. "Can all tattoos be fully removed?"**
+      **Provider Answer:** "Not always. Some tattoos will leave faint 'ghosting,' textural changes, or residual shadowing due to resistant pigments or oxidation. As ethical providers, we focus heavily on significant cosmetic improvement, skin preservation, and realistic expectations, rather than promising guarantees of absolute perfection."
     `,
     questions: [
       {
@@ -654,22 +755,44 @@ const TATTOO_MODULES = [
         text: "Why is a minimum of 6 to 8 weeks required between tattoo removal sessions?",
         options: [
           "To give the machine time to rest.",
-          "Because the immune system (macrophages) needs time to clear the shattered ink through the lymphatic system.",
+          "The first two weeks are for the skin to heal from blisters/scabs, and the following weeks give the lymphatic system time to flush away the shattered ink.",
           "To ensure the numbing cream fully wears off."
         ],
         correctIndex: 1,
-        explanation: "Treating too soon increases scarring risks without speeding up removal. The body physically needs 6-8 weeks to flush the shattered ink particles away."
+        explanation: "Treating too soon increases scarring risks without speeding up removal. The body physically needs 6-8 weeks for both tissue healing and lymphatic flushing."
       },
       {
         id: 'tat-5-2',
-        text: "If a patient asks if blistering is normal after their first tattoo removal session, what is the correct response?",
+        text: "Why do most patients require 5 to 10 sessions to clear a tattoo?",
         options: [
-          "Blistering means the laser was too high and you sustained a 3rd-degree burn.",
-          "Blistering is extremely common within the first 24-48 hours and is a normal part of the healing process.",
-          "Blistering means the tattoo is permanently scarred."
+          "Because the ink is deposited in multiple layers in the dermis, and each laser session only shatters the shallowest layer.",
+          "Because the laser can only stay on for 3 seconds before overheating.",
+          "Because the patient builds an immunity to the laser over time."
+        ],
+        correctIndex: 0,
+        explanation: "Tattoo ink rests in multiple layers. You cannot shatter the deepest layers until the more shallow layers of ink have been shattered and cleared by the body."
+      },
+      {
+        id: 'tat-5-3',
+        text: "A patient asks if an online 'detox cream' will speed up their tattoo removal. What is the most accurate clinical response?",
+        options: [
+          "Yes, detox creams break down the ink faster than the laser.",
+          "Time is the biggest factor. While hydration and exercise help the immune system clear ink, miracle creams, detox claims, and lymphatic gimmicks do not work.",
+          "Yes, but only if applied immediately after the laser session."
         ],
         correctIndex: 1,
-        explanation: "Blistering is an incredibly common, expected reaction as the skin responds to the intense photoacoustic shockwave and thermal energy."
+        explanation: "Miracle creams and detox gimmicks are ineffective. Healthy immune function (hydration, exercise) and time are the only proven ways to accelerate lymphatic clearance."
+      },
+      {
+        id: 'tat-5-4',
+        text: "Why might an ethical provider choose to stop treating a tattoo that still has tiny, stubborn black dots remaining?",
+        options: [
+          "To preserve the overall quality of the skin and prevent permanent scarring or textural damage from over-treatment.",
+          "Because the laser machine cannot fire at single dots.",
+          "Because tiny black dots will eventually turn invisible on their own."
+        ],
+        correctIndex: 0,
+        explanation: "Ethical providers focus on cosmetic improvement and skin preservation over absolute perfection. Continuing to aggressively target encapsulated or highly resistant residual dots often leads to irreversible skin damage."
       }
     ]
   },
@@ -681,40 +804,94 @@ const TATTOO_MODULES = [
     track: "Clinical Safety",
     duration: "30 min",
     content: `
-      **The Clinical Endpoint: "Frosting"**
-      The immediate, desired clinical endpoint during tattoo removal is called **frosting** (epidermal whitening). This white, ash-like appearance happens immediately as the laser pulse strikes the ink. It is caused by rapid steam/gas bubble formation in the skin from the shattered ink and water. This frosting typically subsides within 10 to 20 minutes. If frosting is not observed, the laser exposure dose is likely insufficient.
+      **The Clinical Endpoint: "Frosting" & Light Scattering**
+      The immediate, desired clinical endpoint during tattoo removal is called **frosting** (epidermal whitening). It is caused by rapid steam/gas bubble formation in the skin from the shattered ink and water. 
 
-      **Other Normal Immediate Reactions**
-      Mild erythema (redness), edema (swelling), and occasional pinpoint bleeding are also normal immediate endpoints, especially in darker or densely packed tattoos. 
-      *Technique tip:* If pinpoint bleeding occurs, gently pat the area dry with sterile gauze before firing again to avoid blood splatter.
+      💡 *Pro Pearl: Frosting ≠ The Ultimate Endpoint*
+      Heavy frosting doesn’t always mean better clearance. Experienced techs actually aim for light-to-moderate frosting, an audible snap, and mild perifollicular edema instead of aggressive, blinding whitening. 
 
-      **Possible Mid- to Long-Term Complications**
-      • **Hypopigmentation (White Spots):** Drop-like white maculae can occur if the fluence is too high or if the 532nm wavelength is used inappropriately on darker skin, destroying the natural melanin. It is usually transient but can take 3-6 months to resolve.
-      • **Hyperpigmentation (PIH):** Darkening of the skin due to thermal damage. Highly exacerbated by sun exposure!
-      • **Scarring:** Extremely rare when using appropriate spot sizes and intervals. Areas prone to hypertrophic scarring (chest, neck, upper back) should be treated with lower fluences. Overlapping pulses or treating too frequently (ignoring the 6-week rule) massively increases scarring risk.
+      <div style="background-color: #231C1A; border: 1px solid #8B4828; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
+        <h4 style="color: #d4b09e; margin-top: 0; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">📷 Clinical Visual Guide: The Ideal Endpoint</h4>
+        <p style="margin-bottom: 10px; font-size: 14px; color: #e8d5cc;"><strong>1. Immediate Post-Pulse:</strong> A distinct, opaque white "frosting" appears directly over the treated ink.</p>
+        <p style="margin-bottom: 0; font-size: 14px; color: #e8d5cc;"><strong>2. Shortly After (10-20 mins):</strong> The frosting fades. The tissue appears slightly "bruised" with localized erythema (reddening) and mild edema (swelling). <em>This is the perfect, safe reaction. Be patient and wait for it!</em></p>
+      </div>
+      
+      **The Danger of "Chasing the Crack" or "Chasing the Frost"**
+      Some operators look for a blinding white frost or listen for a loud 'crack' sound with every single pulse. **This is wrong!** A loud crack indicates that *too much energy* has been delivered. Furthermore, some ink colors simply will not turn white or generate a crack. 
+      
+      **What are the exact effects of using too much fluence (energy)?**
+      1. More damage to the collagen, resulting in **more scarring**.
+      2. More scarring means **more light scattering** in subsequent treatments.
+      3. More scattering means **less effective treatments**, especially in deeper regions.
+      4. Ultimately, **less likelihood of a successful clearance!**
+
+      *A Critical Clinical Shift:* Frosting is usually very obvious during the first few treatments. However, **it becomes much less noticeable after around four or five sessions.** Scarred tissue (fibrosis) from prior sessions scatters light much more readily, making the frost look far less obvious. 
+      **WARNING:** Do not "chase" the visual frost by aggressively turning up the fluence. Relying purely on frost in later sessions is a massive mistake that will lead to hypertrophic scarring!
+
+      💡 *Pro Pearl: The "Ghost Tattoo" Trap*
+      If you overtreat and severely damage the collagen, the skin becomes pale and shiny (fibrosis). Any residual ink then becomes permanently trapped beneath this scar tissue. The tattoo looks "stuck." Advanced providers know that perfect clearance isn't always worth it—they would rather leave faint residual shadowing than permanently scar the skin chasing perfection.
+
+      **Avoiding Hypopigmentation**
+      Hypopigmentation (white spots) is the result of killing melanocytes. The providers with the best long-term outcomes are incredibly conservative, especially on darker Fitzpatrick types.
+      To avoid hypopigmentation:
+      1. **Stay Conservative:** Undertreat slightly and build gradually.
+      2. **Watch the Skin, Not the Ink:** Stop treating if you see epidermal graying, waxy texture, delayed healing, or shiny skin. These are warning signs that melanocytes are stressed!
+
+      **What Causes Scarring?**
+      Scar formation generally occurs for only two reasons:
+      1. **Infection:** Fibrosis can occur after a severe post-treatment infection. (Entirely the patient's responsibility).
+      2. **Too Much Energy:** The application of too much laser energy thermally damages the dermis. (Entirely the operator's responsibility!).
+
+      <div style="background-color: #2a1114; border: 1px solid #7f1d1d; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
+        <h4 style="color: #fca5a5; margin-top: 0; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">⚠️ Clinical Visual Guide: Adverse Reactions</h4>
+        <p style="margin-bottom: 10px; font-size: 14px; color: #fecaca;"><strong>Severe Blistering:</strong> Thick, dark, blood-filled blisters. This frequently happens when the area is severely over-heated by excessive fluence.</p>
+        <p style="margin-bottom: 0; font-size: 14px; color: #fecaca;"><strong>Punctate Bleeding & Epidermal Loss:</strong> If the epidermis is completely removed, exposing the raw, ink-laden dermis beneath, the fluence used was drastically too high. A large margin of angry erythema indicates high probability of impending infection.</p>
+      </div>
     `,
     questions: [
       {
         id: 'tat-6-1',
-        text: "What is the immediate, desired clinical endpoint when firing the QS Nd:YAG over a dark tattoo?",
+        text: "According to advanced providers, what is the 'Ghost Tattoo' trap?",
         options: [
-          "Immediate disappearance of the tattoo forever.",
-          "Epidermal frosting (a white, ash-like appearance) caused by gas bubbles.",
-          "Severe bruising and large hematomas."
+          "When a tattoo disappears completely but returns a year later.",
+          "Overtreating the skin until it becomes pale, shiny scar tissue, permanently trapping the remaining faint ink underneath.",
+          "When invisible ink is used."
         ],
         correctIndex: 1,
-        explanation: "Frosting is the expected clinical endpoint indicating the ink has shattered. It is caused by steam/gas bubbles and usually fades in 10-20 minutes."
+        explanation: "Chasing 100% perfection with aggressive settings causes fibrosis. This scar tissue becomes shiny and pale, permanently trapping the remaining 'ghost' ink beneath it."
       },
       {
         id: 'tat-6-2',
-        text: "Which of the following significantly increases the risk of severe hypopigmentation (white spots) on a patient with Fitzpatrick Type V skin?",
+        text: "According to the lesson, what is the ultimate cascade effect of using too much fluence and 'chasing the crack'?",
         options: [
-          "Using a 1064nm wavelength.",
-          "Waiting 8 weeks between sessions.",
-          "Using a 532nm wavelength."
+          "It clears the tattoo much faster, requiring fewer sessions.",
+          "It causes excessive collagen damage and scarring, which scatters light in future sessions and drastically lowers the likelihood of successful clearance.",
+          "It prevents the lymphatic system from functioning properly."
+        ],
+        correctIndex: 1,
+        explanation: "Excess energy causes more scarring. Scarring scatters light in subsequent treatments, making future sessions less effective and preventing complete clearance."
+      },
+      {
+        id: 'tat-6-3',
+        text: "When attempting to avoid permanent hypopigmentation, which of the following is a major warning sign that you should stop treating or lower settings?",
+        options: [
+          "Mild perifollicular edema.",
+          "Epidermal graying, waxy texture, or overly shiny skin.",
+          "A crisp, opaque white frosting that fades in 10 minutes."
+        ],
+        correctIndex: 1,
+        explanation: "Waxy, shiny, or graying epidermis indicates severe stress to the melanocytes. Providers must watch the skin's reaction, not just the ink's reaction, to prevent hypopigmentation."
+      },
+      {
+        id: 'tat-6-4',
+        text: "Which of the following significantly increases the risk of severe hypopigmentation (white spots) on a patient?",
+        options: [
+          "Using a 1064nm wavelength conservatively.",
+          "Waiting 8-12 weeks between sessions.",
+          "Using fluences that are too high, permanently destroying the natural melanocytes."
         ],
         correctIndex: 2,
-        explanation: "The 532nm wavelength is highly absorbed by melanin. Using it on dark skin will aggressively destroy the patient's natural pigment, causing severe hypopigmentation."
+        explanation: "Excessive energy destroys the skin's melanin-producing cells, leading to permanent hypopigmentation. Staying conservative and watching the skin's reaction preserves natural pigment."
       }
     ]
   },
@@ -726,40 +903,73 @@ const TATTOO_MODULES = [
     track: "Guest Experience",
     duration: "20 min",
     content: `
+      **The Ideal Treatment Protocol: Icing & Cooling**
+      Thermal management is critical to preventing burns and minimizing pain. 
+      • **PRE-TREATMENT:** Apply an ice pack (like a Kool Pak) to the treatment area for *at least five minutes* prior to firing the laser. This will significantly reduce the painful sensations felt by the patient.
+      • **POST-TREATMENT:** Apply an ice pack for *at least ten minutes* immediately following the treatment. This draws out any excess heat trapped in the dermis, dramatically reducing blistering, erythema, and epidermal damage.
+
       **Pre-Treatment Preparation**
-      • **Sun Avoidance:** Tanned skin acts as a light-blocker, drawing laser energy into the epidermis and away from the tattoo, risking severe burns. Patients must avoid sun/tanning beds for 3-4 weeks prior. Tanned skin CANNOT simply be treated as a darker Fitzpatrick type.
+      • **Sun Avoidance:** Tanned skin acts as a light-blocker, drawing laser energy into the epidermis and away from the tattoo, risking severe burns. Patients must avoid sun/tanning beds for 3-4 weeks prior. 
       • **Clean Skin:** Ensure the treatment area is perfectly clean. Inorganic sunscreens or foundations left on the skin may cause a loud "pop" when the laser is applied, signaling inadequate cleansing that can burn the surface.
       • **Shaving:** The area should be shaved to prevent surface hair from absorbing energy and burning.
 
+      **Wound Healing & Time Between Sessions**
+      While 6 to 8 weeks is the "industry standard" minimum wait time, clinical research strongly suggests that waiting **12 weeks (or up to 6 months!)** is significantly better and results in higher ink clearance rates. Here is why:
+      1. After a laser session, the skin enters complex stages of wound healing (Haemostasis, Inflammation, Proliferation, and Remodelling). 
+      2. The main priorities of the body's wound response mechanism are to repair structural damage and fight infection. 
+      3. **Removing annoying bits of ink is very low on the body's priority list!**
+      
+      💡 *Pro Pearl: The 8-12 Week Surge*
+      A huge pearl providers learn late: Tattoos often lighten MORE between weeks 8 and 12 than they do between weeks 0 and 6! The majority of the ink removal process only occurs *after* the initial wound is fully healed. If you treat a patient every 4 to 6 weeks, you are not allowing sufficient time for the skin to remove the ink before creating a *new* trauma. 
+
+      **The 18-Month Equation**
+      Think about the overall timeline required to remove a tattoo:
+      • 10 treatments spaced at 2-month intervals = roughly **20 months**.
+      • 4 treatments spaced at 5-month intervals = roughly **20 months**.
+      The overall time required is almost identical! However, the longer intervals result in drastically less trauma to the skin, a massive reduction in scarring, and significantly fewer painful visits for the patient.
+
+      💡 *Pro Pearl: The Immune System Dictates Success*
+      Because tattoo removal is biologically dependent, the patient's lifestyle matters heavily. Slower clearance is almost always seen with smoking, autoimmune issues, and poor circulation. Conversely, patients who exercise regularly, hydrate well, and have healthy lymphatic drainage will see significantly faster fading.
+
       **Post-Treatment Care: The Healing Phase**
-      Immediately after treatment, the area should be cooled with cool compresses or cold air to pull out residual heat.
-      • **Wound Care:** With the epithelium injured, an antibiotic ointment or hydrogel dressing should be applied. 
+      Immediately after treatment, the area should be cooled. 
+      • **Wound Care:** With the epithelium injured, patients must consider the site an "open wound". A barrier cream (like Biafine, E45, or a sterile hydrogel) should be applied. 
       • **Blister Management:** If blisters form (which is common), patients must NOT pop, pick, or scratch them. Doing so opens the skin to severe infection and virtually guarantees a permanent scar.
-      • **Hydration:** Patients should be instructed to drink 8-10 glasses of water daily. Proper hydration is critical to support the lymphatic system as it works to flush the shattered ink particles out of the body.
-      • **Sun Protection:** The treated area is incredibly photosensitive. Strict sun avoidance and SPF 30-50 are mandatory to prevent post-inflammatory hyperpigmentation.
+      • **Hydration:** Patients should be instructed to drink 8-10 glasses of water daily. Proper hydration is critical to support the lymphatic system.
     `,
     questions: [
       {
         id: 'tat-7-1',
-        text: "Why is it important for a patient to drink 8-10 glasses of water daily following a tattoo removal session?",
+        text: "Why is waiting 12 weeks (or even 6 months) between sessions often far more effective than the standard 6 weeks?",
         options: [
-          "To cool down their core body temperature.",
-          "To support the lymphatic system in efficiently flushing out the shattered ink particles.",
-          "To prevent the laser from dehydrating the epidermis."
+          "Because the laser machine needs to be recalibrated every 12 weeks.",
+          "Because the body prioritizes structural wound healing first. Ink removal is a low priority and mostly occurs 8-12 weeks AFTER the initial laser trauma.",
+          "Because the ink takes 12 weeks to chemically dissolve."
         ],
         correctIndex: 1,
-        explanation: "Hydration is essential for optimal lymphatic function, which is the system responsible for clearing the microscopic ink fragments from the body."
+        explanation: "Treating too frequently interrupts the body's natural clearing process. Giving the body 3 to 6 months allows it to flush significantly more ink per session."
       },
       {
         id: 'tat-7-2',
-        text: "If a patient comes in with a fresh, dark suntan over their tattoo, how should you proceed?",
+        text: "Why does the patient's lifestyle (smoking, exercise, hydration) drastically impact their tattoo removal results?",
         options: [
-          "Increase the laser energy to push through the tan.",
-          "Refuse treatment until the tan has completely faded (3-4 weeks minimum) to avoid severe burns and hypopigmentation.",
-          "Reclassify them as a Fitzpatrick VI and proceed normally."
+          "Because exercise makes the skin stretch and pull the ink apart.",
+          "Because tattoo removal is an immunologic process. Healthy lymphatic drainage and good circulation are required to physically flush the shattered ink from the body.",
+          "It doesn't; the laser does 100% of the removal work."
         ],
         correctIndex: 1,
-        explanation: "Treating over a fresh tan is an absolute contraindication. The active surface melanin will absorb the laser energy, causing severe epidermal burns and pigment damage."
+        explanation: "The laser only shatters the ink. The patient's immune system does the actual removal. Poor circulation (from smoking) drastically slows clearance, while exercise and hydration speed it up."
+      },
+      {
+        id: 'tat-7-3',
+        text: "According to the '18-Month Equation', why might a provider recommend 4 treatments spaced 5 months apart rather than 10 treatments spaced 2 months apart?",
+        options: [
+          "Because the provider makes more money doing fewer treatments.",
+          "The overall completion time is the same, but the longer intervals result in drastically less skin trauma, less scarring, and fewer painful visits for the patient.",
+          "Because the laser requires 5 months to recharge."
+        ],
+        correctIndex: 1,
+        explanation: "Spacing treatments out allows the lymphatic system to naturally clear significantly more ink per session, resulting in identical timeline results but with far less bodily trauma."
       }
     ]
   }
@@ -793,7 +1003,7 @@ const CERTIFICATIONS = [
       { id: 'tat-p1', label: 'Observed and Performed M22 QS Nd:YAG Startup & Safety (OD > 4.0 Eyewear)' },
       { id: 'tat-p2', label: 'Observed and Performed Device Calibration (Without Lens Assembly)' },
       { id: 'tat-p3', label: 'Observed and Performed Pre-Treatment Contraindication Screening (Tans, Gold Therapy, Double Tattoos)' },
-      { id: 'tat-p4', label: 'Observed and Performed Test Patch with Minimum 30-min Wait Time' },
+      { id: 'tat-p4', label: 'Observed and Performed Test Patch with 30-60 Second Wait Time' },
       { id: 'tat-p5', label: 'Observed and Performed 3 Tattoo Removal Treatments (Tip Legs in Contact, No Scratching)' },
       { id: 'tat-p6', label: 'Demonstrated Recognition of Proper Clinical Endpoints (Frosting & Pinpoint Bleeding)' },
       { id: 'tat-p7', label: 'Observed and Performed Post-Care Education (Lymphatic Drainage Hydration)' },
@@ -810,19 +1020,35 @@ export default function App() {
   // Dashboard Specific State
   const [activeModuleId, setActiveModuleId] = useState(LHR_MODULES[0].id);
   const [readingMode, setReadingMode] = useState(false);
+  const [readingStartTime, setReadingStartTime] = useState(null);
   const [answers, setAnswers] = useState({});
   const [quizState, setQuizState] = useState({ submitted: false, passed: false });
   const [quizError, setQuizError] = useState('');
   const [loginError, setLoginError] = useState('');
   
   // Feedback State
-  const [feedbackText, setFeedbackText] = useState('');
-  const [isSavingFeedback, setIsSavingFeedback] = useState(false);
-  const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
-  const [feedbackQuote, setFeedbackQuote] = useState("");
+  const [courseFeedbackText, setCourseFeedbackText] = useState('');
+  const [isSavingCourseFeedback, setIsSavingCourseFeedback] = useState(false);
+  const [showCourseFeedbackSuccess, setShowCourseFeedbackSuccess] = useState(false);
+  const [courseFeedbackQuote, setCourseFeedbackQuote] = useState("");
+  
+  // Supervisor Drafts State
+  const [supervisorDrafts, setSupervisorDrafts] = useState({});
+  const [supervisorPrivateDrafts, setSupervisorPrivateDrafts] = useState({});
+  const [supervisorOverallDrafts, setSupervisorOverallDrafts] = useState({});
   
   // Data State
-  const [studentData, setStudentData] = useState({ theoreticalProgress: {}, practicalChecklist: {}, signoffs: {}, moduleFeedback: {}, quizPerformance: {} });
+  const [studentData, setStudentData] = useState({ 
+    theoreticalProgress: {}, 
+    practicalChecklist: {}, 
+    signoffs: {}, 
+    courseFeedback: {}, 
+    quizPerformance: {},
+    supervisorComments: {},
+    supervisorPrivateNotes: {},
+    supervisorOverallNotes: {},
+    moduleTimeSpent: {}
+  });
   const [allStudents, setAllStudents] = useState([]);
   const [selectedStudentForSignoff, setSelectedStudentForSignoff] = useState(null);
   const [expandedStudentId, setExpandedStudentId] = useState(null);
@@ -862,7 +1088,17 @@ export default function App() {
         if (docSnap.exists()) {
           setStudentData(docSnap.data());
         } else {
-          setDoc(docRef, { theoreticalProgress: {}, practicalChecklist: {}, signoffs: {}, moduleFeedback: {}, quizPerformance: {} });
+          setDoc(docRef, { 
+            theoreticalProgress: {}, 
+            practicalChecklist: {}, 
+            signoffs: {}, 
+            courseFeedback: {}, 
+            quizPerformance: {},
+            supervisorComments: {},
+            supervisorPrivateNotes: {},
+            supervisorOverallNotes: {},
+            moduleTimeSpent: {}
+          });
         }
       }, (err) => console.error(err));
       
@@ -880,14 +1116,14 @@ export default function App() {
     return () => { if (unsubscribe) unsubscribe(); };
   }, [firebaseUser, currentUser]);
 
-  // Sync Local Feedback Text when Module Changes
+  // Sync Local Course Feedback Text when Track Changes
   useEffect(() => {
-    if (studentData?.moduleFeedback?.[activeModuleId]) {
-      setFeedbackText(studentData.moduleFeedback[activeModuleId]);
+    if (studentData?.courseFeedback?.[activeCertId]) {
+      setCourseFeedbackText(studentData.courseFeedback[activeCertId]);
     } else {
-      setFeedbackText('');
+      setCourseFeedbackText('');
     }
-  }, [activeModuleId, studentData.moduleFeedback]);
+  }, [activeCertId, studentData.courseFeedback]);
 
   // Derived state for student
   const activeCert = CERTIFICATIONS.find(c => c.id === activeCertId) || CERTIFICATIONS[0];
@@ -939,27 +1175,62 @@ export default function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setStudentData({ theoreticalProgress: {}, practicalChecklist: {}, signoffs: {}, moduleFeedback: {}, quizPerformance: {} });
+    setStudentData({ theoreticalProgress: {}, practicalChecklist: {}, signoffs: {}, courseFeedback: {}, quizPerformance: {}, supervisorComments: {}, supervisorPrivateNotes: {}, supervisorOverallNotes: {}, moduleTimeSpent: {} });
     setLoginError('');
     setReadingMode(false);
-    setShowFeedbackSuccess(false);
+    setReadingStartTime(null);
+    setShowCourseFeedbackSuccess(false);
     setAppState('login');
   };
 
   const selectModule = (id) => {
     setActiveModuleId(id);
-    setShowFeedbackSuccess(false);
   };
 
   const handleCertChange = (certId) => {
     setActiveCertId(certId);
+    setShowCourseFeedbackSuccess(false);
     const newCert = CERTIFICATIONS.find(c => c.id === certId);
     if (newCert && newCert.modules.length > 0) {
       selectModule(newCert.modules[0].id);
     }
   };
 
-  const handleStartQuiz = () => {
+  const saveTimeSpent = async (secondsToAdd) => {
+    if (!currentUser || !db || !activeModuleId) return;
+    const currentSpent = studentData.moduleTimeSpent?.[activeModuleId] || 0;
+    const newTotal = currentSpent + secondsToAdd;
+
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
+    try {
+      await updateDoc(docRef, {
+        [`moduleTimeSpent.${activeModuleId}`]: newTotal
+      });
+    } catch (e) { 
+      console.error("Error saving time tracking", e); 
+    }
+  };
+
+  const handleOpenReadingMode = () => {
+    setReadingStartTime(Date.now());
+    setReadingMode(true);
+  };
+
+  const handleCloseReadingMode = async () => {
+    if (readingStartTime) {
+      const elapsedSeconds = Math.floor((Date.now() - readingStartTime) / 1000);
+      await saveTimeSpent(elapsedSeconds);
+    }
+    setReadingStartTime(null);
+    setReadingMode(false);
+  };
+
+  const handleStartQuiz = async () => {
+    if (readingStartTime) {
+      const elapsedSeconds = Math.floor((Date.now() - readingStartTime) / 1000);
+      await saveTimeSpent(elapsedSeconds);
+    }
+    setReadingStartTime(null);
     setReadingMode(false);
     setAppState('quiz');
     setAnswers({});
@@ -1026,53 +1297,115 @@ export default function App() {
     }
   };
 
-  const handleSaveFeedback = async () => {
+  const handleSaveCourseFeedback = async () => {
     if (!currentUser || !db || !firebaseUser) return;
-    setIsSavingFeedback(true);
+    setIsSavingCourseFeedback(true);
     
     const quotes = [
       "Continuous improvement is better than delayed perfection. Your feedback helps our practice grow.",
       "Great leaders are always learning. Thank you for elevating our standard of care.",
       "The beautiful thing about learning is that no one can take it away from you.",
-      "Knowledge shared is knowledge multiplied. Thank you for your insights!"
+      "Knowledge shared is knowledge multiplied. Thank you for your insights!",
+      "Your voice is the catalyst for our growth. Thank you for sharing your perspective.",
+      "Every insight you share builds a stronger, more capable team.",
+      "Excellence is not a destination; it's a continuous journey. Thanks for walking it with us.",
+      "The expert in anything was once a beginner. Keep growing, keep shining!",
+      "Feedback is the breakfast of champions. Thank you for fueling our collective success.",
+      "Small steps every day lead to massive results over time.",
+      "We rise by lifting others. Thank you for contributing to our educational standard.",
+      "Your dedication to mastering your craft is what makes this clinic exceptional.",
+      "Never stop learning, because the industry never stops evolving.",
+      "Quality means doing it right when no one is looking. Thank you for your commitment.",
+      "The best way to predict the future is to create it. Thanks for helping us build a better training experience.",
+      "Let the beauty of what you love be what you do. — Rumi",
+      "As you start to walk on the way, the way appears. — Rumi",
+      "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself. — Rumi",
+      "You are not a drop in the ocean. You are the entire ocean in a drop. — Rumi",
+      "What you seek is seeking you. — Rumi",
+      "Wear gratitude like a cloak, and it will feed every corner of your life. — Rumi",
+      "The wound is the place where the Light enters you. — Rumi",
+      "Do not feel lonely, the entire universe is inside you. — Rumi",
+      "There is a voice that doesn’t use words. Listen. — Rumi",
+      "Keep your face always toward the sunshine—and shadows will fall behind you. — Walt Whitman"
     ];
     
     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
     try {
       await updateDoc(docRef, {
-        [`moduleFeedback.${activeModuleId}`]: feedbackText
+        [`courseFeedback.${activeCertId}`]: courseFeedbackText
       });
       // Pick a random quote and show success screen
       setTimeout(() => {
-        setFeedbackQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-        setIsSavingFeedback(false);
-        setShowFeedbackSuccess(true);
+        setCourseFeedbackQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+        setIsSavingCourseFeedback(false);
+        setShowCourseFeedbackSuccess(true);
       }, 600);
     } catch (err) {
       console.error("Error saving feedback", err);
-      setIsSavingFeedback(false);
+      setIsSavingCourseFeedback(false);
     }
   };
 
-  const handleTogglePractical = async (id) => {
-    if (isSignedOff) return; 
+  const handleSaveSupervisorComment = async (studentId, moduleId) => {
     if (!currentUser || !db || !firebaseUser) return;
+    const draftKey = `${studentId}_${moduleId}`;
+    const textToSave = supervisorDrafts[draftKey] || '';
     
-    const newValue = !practicalChecklist[id];
-    
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', currentUser.name);
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
     try {
       await updateDoc(docRef, {
-        [`practicalChecklist.${id}`]: newValue
+        [`supervisorComments.${moduleId}`]: textToSave
       });
-      setStudentData(prev => ({
-        ...prev,
-        practicalChecklist: { ...prev.practicalChecklist, [id]: newValue }
-      }));
+    } catch (err) {
+      console.error("Error saving supervisor comment", err);
+    }
+  };
+
+  const handleSaveSupervisorPrivateNote = async (studentId, moduleId) => {
+    if (!currentUser || !db || !firebaseUser) return;
+    const draftKey = `${studentId}_${moduleId}`;
+    const textToSave = supervisorPrivateDrafts[draftKey] || '';
+    
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+    try {
+      await updateDoc(docRef, {
+        [`supervisorPrivateNotes.${moduleId}`]: textToSave
+      });
+    } catch (err) {
+      console.error("Error saving supervisor private note", err);
+    }
+  };
+
+  const handleSaveSupervisorOverallNote = async (studentId, certId) => {
+    if (!currentUser || !db || !firebaseUser) return;
+    const draftKey = `${studentId}_${certId}`;
+    const textToSave = supervisorOverallDrafts[draftKey] || '';
+    
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+    try {
+      await updateDoc(docRef, {
+        [`supervisorOverallNotes.${certId}`]: textToSave
+      });
+    } catch (err) {
+      console.error("Error saving overall supervisor note", err);
+    }
+  };
+
+  const handleTogglePractical = async (studentId, itemId, currentChecklist, isSignedOffForStudent) => {
+    if (isSignedOffForStudent) return; 
+    if (!currentUser || !db || !firebaseUser) return;
+    
+    const newValue = !currentChecklist[itemId];
+    
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', studentId);
+    try {
+      await updateDoc(docRef, {
+        [`practicalChecklist.${itemId}`]: newValue
+      });
+      // The snapshot listener handles syncing this data for both views!
     } catch (err) {
       console.error("Error saving practical item", err);
     }
-    
   };
 
   const handleSupervisorSignoff = async () => {
@@ -1252,12 +1585,15 @@ export default function App() {
                     key={module.id} 
                     onClick={() => selectModule(module.id)}
                     className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col gap-3 group ${
-                      isActive ? 'border-[#8B4828] bg-[#2e1d16] shadow-md' : 'border-stone-800 bg-[#171311] hover:border-[#4d3a33] hover:bg-[#1f1917]'
+                      isActive ? 'border-[#8B4828] bg-[#2e1d16] shadow-md' : isPassed ? 'border-stone-800/60 bg-[#171311]/40 opacity-75 hover:opacity-100 hover:border-[#4d3a33] hover:bg-[#1f1917]' : 'border-stone-800 bg-[#171311] hover:border-[#4d3a33] hover:bg-[#1f1917]'
                     }`}
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <h4 className={`font-bold text-[15px] mb-1.5 transition-colors ${isActive ? 'text-[#f5dbce]' : 'text-stone-200 group-hover:text-white'}`}>{module.title}</h4>
+                        <h4 className={`font-bold text-[15px] mb-1.5 transition-colors flex items-center gap-2 ${isActive ? 'text-[#f5dbce]' : isPassed ? 'text-stone-400 group-hover:text-stone-200' : 'text-stone-200 group-hover:text-white'}`}>
+                          {module.title}
+                          {isPassed && <CheckCircle className="w-4 h-4 text-emerald-500/80" />}
+                        </h4>
                         <p className="text-xs text-stone-500 font-medium">{module.track} • {module.duration}</p>
                       </div>
                       <ChevronRight className={`w-5 h-5 transition-transform ${isActive ? 'text-[#8B4828]' : 'text-stone-600 group-hover:text-stone-400'} ${isActive ? 'translate-x-1' : ''}`} />
@@ -1273,7 +1609,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* RIGHT PANEL - Now Viewing, Checklist & Feedback */}
+        {/* RIGHT PANEL - Now Viewing, Checklist & Supervisor Notes */}
         <div className="col-span-1 lg:col-span-3 flex flex-col gap-6">
           
           {/* 1. Now Viewing Card */}
@@ -1288,9 +1624,14 @@ export default function App() {
              <h3 className="text-xl font-bold mb-4 leading-tight pr-4 relative z-10 text-white">{activeModule.title}</h3>
              
              <div className="mb-6 relative z-10">
-               <div className="flex justify-between text-xs font-bold text-stone-500 mb-2">
+               <div className="flex justify-between items-center text-xs font-bold text-stone-500 mb-2">
                  <span>{isPassedActive ? '100% complete' : 'Ready to begin'}</span>
-                 {isPassedActive && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                 <div className="flex items-center gap-3">
+                   <span className="flex items-center gap-1.5 text-[#d4b09e]">
+                     <Clock className="w-3.5 h-3.5" /> {formatTime(studentData.moduleTimeSpent?.[activeModule.id])}
+                   </span>
+                   {isPassedActive && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                 </div>
                </div>
                <div className="w-full bg-stone-800 h-1.5 rounded-full overflow-hidden">
                  <div className={`h-full ${isPassedActive ? 'bg-[#d4b09e] w-full' : 'bg-stone-600 w-1/12'}`}></div>
@@ -1298,18 +1639,26 @@ export default function App() {
              </div>
 
              <button 
-               onClick={() => setReadingMode(true)} 
+               onClick={handleOpenReadingMode} 
                className="w-full bg-[#8B4828] hover:bg-[#a85a36] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg relative z-10"
              >
                <Play className="w-4 h-4" fill="currentColor" /> {isPassedActive ? 'Review Lesson' : 'Start Reading'}
              </button>
           </div>
 
-          {/* 2. Practical Checklist */}
+          {/* Supervisor Notes display */}
+          {studentData.supervisorComments?.[activeModuleId] && (
+            <div className="bg-[#8B4828]/10 border border-[#8B4828]/30 rounded-3xl p-6 shadow-sm">
+               <h3 className="font-bold text-lg mb-2 text-[#d4b09e] flex items-center gap-2"><MessageCircle className="w-4 h-4"/> Supervisor Notes</h3>
+               <p className="text-sm text-stone-200 leading-relaxed">{studentData.supervisorComments[activeModuleId]}</p>
+            </div>
+          )}
+
+          {/* 2. Practical Checklist (Employee Side - READ ONLY) */}
           <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg flex flex-col">
             <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2"><CheckSquare className="w-4 h-4 text-[#8B4828]"/> Practical Tasks</h3>
             <div className="flex items-center justify-between mb-5">
-              <p className="text-xs text-stone-400">Complete with supervisor.</p>
+              <p className="text-xs text-stone-400">Evaluated by clinical supervisor only.</p>
               <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#171311] text-stone-300 border border-stone-800">
                 {completedPracticalCount} / {totalPractical}
               </span>
@@ -1319,64 +1668,65 @@ export default function App() {
               {activeCert.practical.map((item) => {
                 const isChecked = practicalChecklist[item.id] === true;
                 return (
-                  <label key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all ${isSignedOff ? 'opacity-50 cursor-default' : 'cursor-pointer'} ${isChecked ? 'bg-[#171311] border-[#8B4828]/50' : 'bg-[#171311] border-stone-800 hover:border-stone-700'}`}>
+                  <div key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all cursor-default ${isChecked ? 'bg-[#171311] border-[#8B4828]/50 shadow-sm' : 'bg-[#171311] border-stone-800 opacity-70'}`}>
                     <div className="pt-0.5">
                       <input 
                         type="checkbox" 
                         className="w-4 h-4 text-[#8B4828] bg-[#231C1A] rounded border-stone-700 focus:ring-[#8B4828] focus:ring-offset-[#171311]" 
                         checked={isChecked}
-                        onChange={() => handleTogglePractical(item.id)}
-                        disabled={isSignedOff}
+                        onChange={() => {}} // Disabled for employees
+                        disabled={true}
                       />
                     </div>
                     <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
-                  </label>
+                  </div>
                 );
               })}
             </div>
           </div>
+        </div>
 
-          {/* 3. Module Feedback */}
-          <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-lg">
-             <h3 className="font-bold text-lg mb-2 text-white flex items-center gap-2"><MessageCircle className="w-4 h-4 text-[#8B4828]"/> Module Feedback</h3>
+        {/* BOTTOM PANEL - COURSE FEEDBACK */}
+        <div className="col-span-1 lg:col-span-9 lg:col-start-4 flex flex-col gap-6">
+          <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-8 shadow-lg">
+             <h3 className="font-bold text-xl mb-2 text-white flex items-center gap-3"><MessageCircle className="w-5 h-5 text-[#8B4828]"/> End of Course Feedback</h3>
              
-             {showFeedbackSuccess ? (
-               <div className="text-center py-6 animate-in fade-in zoom-in-95 duration-300">
-                  <div className="mx-auto w-12 h-12 bg-emerald-950/30 rounded-full flex items-center justify-center mb-4 border border-emerald-900/50">
-                     <CheckCircle className="w-6 h-6 text-emerald-500" />
+             {showCourseFeedbackSuccess ? (
+               <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="mx-auto w-14 h-14 bg-emerald-950/30 rounded-full flex items-center justify-center mb-5 border border-emerald-900/50">
+                     <CheckCircle className="w-7 h-7 text-emerald-500" />
                   </div>
-                  <h4 className="text-white font-bold mb-2 tracking-wide">Feedback Saved!</h4>
-                  <p className="text-[#d4b09e] text-sm italic font-serif leading-relaxed mb-6 px-2">
-                    "{feedbackQuote}"
+                  <h4 className="text-white font-bold text-lg mb-2 tracking-wide">Feedback Saved!</h4>
+                  <p className="text-[#d4b09e] text-base italic font-serif leading-relaxed mb-6 px-4 max-w-2xl mx-auto">
+                    "{courseFeedbackQuote}"
                   </p>
                   <button 
-                     onClick={() => setShowFeedbackSuccess(false)}
-                     className="text-xs font-bold text-stone-400 hover:text-white underline underline-offset-4 transition-colors"
+                     onClick={() => setShowCourseFeedbackSuccess(false)}
+                     className="text-sm font-bold text-stone-400 hover:text-white underline underline-offset-4 transition-colors"
                   >
                     Edit or Add More Feedback
                   </button>
                </div>
              ) : (
                <>
-                 <p className="text-xs text-stone-400 mb-4">Leave notes, questions, or feedback regarding <span className="text-stone-300 font-medium">"{activeModule.title}"</span> for your supervisor.</p>
+                 <p className="text-sm text-stone-400 mb-6">Share your overall thoughts, notes, or questions regarding the <span className="text-stone-300 font-medium">"{activeCert.title}"</span> track with your supervisor.</p>
                  
                  <textarea 
-                    value={feedbackText}
-                    onChange={(e) => setFeedbackText(e.target.value)}
+                    value={courseFeedbackText}
+                    onChange={(e) => setCourseFeedbackText(e.target.value)}
                     placeholder="Type your notes here..."
-                    className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B4828] transition-all min-h-[120px] resize-none mb-4"
+                    className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-5 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B4828] transition-all min-h-[140px] resize-none mb-5"
                  />
                  <button 
-                    onClick={handleSaveFeedback}
-                    disabled={isSavingFeedback || !feedbackText.trim()}
-                    className="w-full bg-[#171311] border border-stone-700 hover:border-stone-500 text-white py-3 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center gap-2 text-sm"
+                    onClick={handleSaveCourseFeedback}
+                    disabled={isSavingCourseFeedback || !courseFeedbackText.trim()}
+                    className="w-full sm:w-auto sm:px-10 bg-[#8B4828] hover:bg-[#a85a36] text-white py-3.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center gap-2 text-sm ml-auto"
                  >
-                    {isSavingFeedback ? <Activity className="w-4 h-4 animate-spin"/> : 'Save Feedback'}
+                    {isSavingCourseFeedback ? <Activity className="w-5 h-5 animate-spin"/> : 'Save Feedback'}
                  </button>
                </>
              )}
           </div>
-
         </div>
 
       </div>
@@ -1388,7 +1738,7 @@ export default function App() {
     const isPassedActive = theoreticalProgress[activeModule.id] === 'passed';
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setReadingMode(false)}></div>
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={handleCloseReadingMode}></div>
         <div className="relative w-full max-w-4xl max-h-full bg-[#171311] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-stone-800">
           
           <div className="flex items-center justify-between p-6 md:p-8 border-b border-stone-800 bg-[#231C1A]">
@@ -1401,7 +1751,7 @@ export default function App() {
                  <h2 className="text-2xl sm:text-3xl font-bold text-white leading-none tracking-tight">{activeModule.title}</h2>
                </div>
             </div>
-            <button onClick={() => setReadingMode(false)} className="p-2.5 bg-[#171311] hover:bg-stone-800 border border-stone-800 rounded-full transition-colors flex-shrink-0">
+            <button onClick={handleCloseReadingMode} className="p-2.5 bg-[#171311] hover:bg-stone-800 border border-stone-800 rounded-full transition-colors flex-shrink-0">
               <X className="w-5 h-5 text-stone-400" />
             </button>
           </div>
@@ -1426,7 +1776,7 @@ export default function App() {
                 Take Quiz <ArrowRight className="w-5 h-5" />
               </button>
             ) : (
-              <button onClick={() => setReadingMode(false)} className="bg-stone-800 hover:bg-stone-700 text-white px-8 py-3.5 rounded-xl font-bold transition-colors shadow-lg">
+              <button onClick={handleCloseReadingMode} className="bg-stone-800 hover:bg-stone-700 text-white px-8 py-3.5 rounded-xl font-bold transition-colors shadow-lg">
                 Done Reading
               </button>
             )}
@@ -1546,7 +1896,18 @@ export default function App() {
             {!quizState.submitted ? (
               <button onClick={handleSubmitQuiz} className="bg-white hover:bg-stone-200 text-black px-8 py-4 rounded-xl font-bold transition-colors shadow-lg">Check Answers</button>
             ) : quizState.passed ? (
-              <button onClick={() => { setAppState('student-dash'); setActiveModuleId(LHR_MODULES[0].id); }} className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-lg">Complete Module</button>
+              <button onClick={() => { 
+                  setAppState('student-dash'); 
+                  const currentIndex = activeCert.modules.findIndex(m => m.id === activeModuleId);
+                  if (currentIndex < activeCert.modules.length - 1) {
+                    setActiveModuleId(activeCert.modules[currentIndex + 1].id);
+                  }
+                  window.scrollTo(0, 0); 
+                }} 
+                className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-lg"
+              >
+                Complete Module & Continue
+              </button>
             ) : (
               <button onClick={handleStartQuiz} className="bg-stone-800 hover:bg-stone-700 text-white px-8 py-4 rounded-xl font-bold transition-colors shadow-lg">Retry Quiz</button>
             )}
@@ -1647,13 +2008,31 @@ export default function App() {
                   
                   {isExpanded && (
                     <div className="p-6 sm:px-8 bg-[#171311] border-t border-stone-800 shadow-inner">
+                      
+                      {/* Overall Course Feedback Display */}
+                      {student.courseFeedback?.[activeCertId] && (
+                        <div className="mb-8 bg-[#231C1A] p-6 rounded-3xl border border-[#8B4828]/30 shadow-md relative overflow-hidden">
+                           <div className="absolute top-0 right-0 p-4 opacity-5">
+                             <MessageCircle className="w-16 h-16" />
+                           </div>
+                           <h4 className="font-bold text-[#d4b09e] text-xs uppercase tracking-widest mb-3 flex items-center gap-2 relative z-10"><MessageCircle className="w-4 h-4"/> Overall Course Feedback from Employee</h4>
+                           <p className="text-sm text-stone-200 italic font-serif leading-relaxed relative z-10">"{student.courseFeedback[activeCertId]}"</p>
+                        </div>
+                      )}
+
                       <h4 className="font-bold text-white mb-5 flex items-center gap-2 tracking-wide">
-                        <MessageCircle className="w-5 h-5 text-[#8B4828]"/> Module Feedback & Status
+                        <Activity className="w-5 h-5 text-[#8B4828]"/> Module Details & Private Notes
                       </h4>
                       <div className="grid gap-5 md:grid-cols-2">
                         {activeCert.modules.map(mod => {
                           const isPassed = student.theoreticalProgress?.[mod.id] === 'passed';
-                          const feedback = student.moduleFeedback?.[mod.id];
+                          const stats = student.quizPerformance?.[mod.id] || { attempts: 0, mistakes: {} };
+                          
+                          const draftKey = `${student.id}_${mod.id}`;
+                          const currentDraft = supervisorDrafts[draftKey] ?? (student.supervisorComments?.[mod.id] || '');
+                          const currentPrivateDraft = supervisorPrivateDrafts[draftKey] ?? (student.supervisorPrivateNotes?.[mod.id] || '');
+                          
+                          const hasMistakes = Object.keys(stats.mistakes).length > 0;
                           
                           return (
                             <div key={mod.id} className="bg-[#231C1A] p-5 rounded-2xl border border-stone-800 shadow-md flex flex-col justify-between">
@@ -1661,26 +2040,136 @@ export default function App() {
                                 <div className="flex justify-between items-start mb-3">
                                   <span className="font-bold text-white text-sm pr-3 leading-snug">{mod.title}</span>
                                   {isPassed ? (
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-900/20 text-emerald-400 uppercase tracking-wider border border-emerald-900/30">Read</span>
+                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-900/20 text-emerald-400 uppercase tracking-wider border border-emerald-900/30 shrink-0">Passed</span>
                                   ) : (
-                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-[#171311] text-stone-500 uppercase tracking-wider border border-stone-800">Pending</span>
+                                    <span className="text-[10px] font-bold px-2 py-1 rounded bg-[#171311] text-stone-500 uppercase tracking-wider border border-stone-800 shrink-0">Pending</span>
                                   )}
                                 </div>
-                                {feedback ? (
-                                  <div className="mt-3 bg-[#171311] p-3.5 rounded-xl border border-stone-800/50 relative">
-                                    <span className="text-[#8B4828] font-serif text-3xl absolute top-1 left-2 opacity-50">"</span>
-                                    <p className="text-sm text-stone-300 leading-relaxed relative z-10 pl-4">{feedback}</p>
+
+                                <div className="flex flex-wrap items-center gap-4 text-xs text-stone-400 mb-4">
+                                  <span>Quiz Attempts: <span className="font-bold text-stone-200">{stats.attempts}</span></span>
+                                  <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#d4b09e]"/> Time Spent: <span className="font-bold text-stone-200">{formatTime(student.moduleTimeSpent?.[mod.id])}</span></span>
+                                </div>
+
+                                {/* Missed Questions Display */}
+                                {hasMistakes ? (
+                                  <div className="space-y-3 mt-4 mb-4 pt-4 border-t border-stone-800/50">
+                                    <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                                      <AlertTriangle className="w-3 h-3" /> Questions Missed on Quiz:
+                                    </p>
+                                    <ul className="space-y-3">
+                                      {Object.entries(stats.mistakes).map(([qId, count]) => {
+                                         const qText = mod.questions.find(q => q.id === qId)?.text || 'Unknown question';
+                                         return (
+                                           <li key={qId} className="text-xs flex flex-col gap-1.5 bg-[#171311] p-3.5 rounded-xl border border-rose-900/30">
+                                              <span className="text-stone-300 leading-relaxed block">{qText}</span>
+                                              <span className="text-[10px] font-bold text-rose-400 w-fit bg-rose-950/40 px-2 py-0.5 rounded border border-rose-900/50">Missed {count} times</span>
+                                           </li>
+                                         );
+                                      })}
+                                    </ul>
                                   </div>
-                                ) : (
-                                  <div className="mt-3 pt-3 border-t border-stone-800/50">
-                                    <span className="text-xs text-stone-600 italic">No feedback provided for this module.</span>
+                                ) : stats.attempts > 0 ? (
+                                  <div className="mt-3 mb-4 pt-3 border-t border-stone-800/50">
+                                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5"><CheckCircle className="w-4 h-4"/> Passed perfectly on first try!</span>
                                   </div>
-                                )}
+                                ) : null}
+
+                                {/* Public Supervisor Comments Section */}
+                                <div className="mt-auto pt-4 border-t border-stone-800/50">
+                                  <label className="text-[10px] font-bold text-[#8B4828] uppercase tracking-wider block mb-2">Leave a Note for Student:</label>
+                                  <textarea
+                                    value={currentDraft}
+                                    onChange={(e) => setSupervisorDrafts(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                    placeholder="Add feedback on this module for the student to see..."
+                                    className="w-full bg-[#171311] text-stone-300 placeholder-stone-600 border border-stone-800 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#8B4828] transition-all min-h-[70px] resize-none mb-2"
+                                  />
+                                  <button
+                                    onClick={() => handleSaveSupervisorComment(student.id, mod.id)}
+                                    className="w-full bg-[#302624] hover:bg-[#8B4828] text-white py-2.5 rounded-lg font-bold transition-colors shadow-sm text-xs flex justify-center items-center gap-2"
+                                  >
+                                    <Save className="w-3.5 h-3.5" /> Save Note for Student
+                                  </button>
+                                </div>
+
+                                {/* Private Supervisor Notes Section */}
+                                <div className="mt-4 pt-4 border-t border-stone-800/50">
+                                  <label className="text-[10px] font-bold text-stone-400 flex items-center gap-1.5 uppercase tracking-wider block mb-2">
+                                    <Lock className="w-3 h-3"/> Private Module Note
+                                  </label>
+                                  <textarea
+                                    value={currentPrivateDraft}
+                                    onChange={(e) => setSupervisorPrivateDrafts(prev => ({ ...prev, [draftKey]: e.target.value }))}
+                                    placeholder="Add private evaluation notes on this module..."
+                                    className="w-full bg-[#171311] text-stone-300 placeholder-stone-600 border border-stone-800 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-stone-500 transition-all min-h-[70px] resize-none mb-2"
+                                  />
+                                  <button
+                                    onClick={() => handleSaveSupervisorPrivateNote(student.id, mod.id)}
+                                    className="w-full bg-[#171311] border border-stone-800 hover:border-stone-500 text-stone-400 hover:text-white py-2.5 rounded-lg font-bold transition-colors shadow-sm text-xs flex justify-center items-center gap-2"
+                                  >
+                                    <Save className="w-3.5 h-3.5" /> Save Private Note
+                                  </button>
+                                </div>
+
                               </div>
                             </div>
                           )
                         })}
                       </div>
+
+                      {/* Practical Tasks Evaluation (Supervisor Side) */}
+                      <h4 className="font-bold text-white mb-5 mt-8 flex items-center gap-2 tracking-wide">
+                        <CheckSquare className="w-5 h-5 text-[#8B4828]"/> Practical Tasks Evaluation
+                      </h4>
+                      <div className="bg-[#231C1A] border border-stone-800 rounded-3xl p-6 shadow-md">
+                        <div className="flex items-center justify-between mb-5">
+                          <p className="text-xs text-stone-400">Check off items as the employee demonstrates competency.</p>
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-[#171311] text-stone-300 border border-stone-800">
+                            {s_pracCount} / {totalPractical}
+                          </span>
+                        </div>
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                          {activeCert.practical.map((item) => {
+                            const isChecked = (student.practicalChecklist || {})[item.id] === true;
+                            return (
+                              <label key={item.id} className={`flex items-start gap-4 p-3.5 rounded-2xl border transition-all ${s_isSignedOff ? 'opacity-50 cursor-default' : 'cursor-pointer'} ${isChecked ? 'bg-[#171311] border-[#8B4828]/50' : 'bg-[#171311] border-stone-800 hover:border-stone-700'}`}>
+                                <div className="pt-0.5">
+                                  <input 
+                                    type="checkbox" 
+                                    className="w-4 h-4 text-[#8B4828] bg-[#231C1A] rounded border-stone-700 focus:ring-[#8B4828] focus:ring-offset-[#171311]" 
+                                    checked={isChecked}
+                                    onChange={() => handleTogglePractical(student.id, item.id, student.practicalChecklist || {}, s_isSignedOff)}
+                                    disabled={s_isSignedOff}
+                                  />
+                                </div>
+                                <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Overall Supervisor Notes Section */}
+                      <div className="mt-8 bg-[#231C1A] p-6 rounded-3xl border border-stone-800 shadow-md">
+                         <h4 className="font-bold text-[#d4b09e] text-sm uppercase tracking-widest mb-1 flex items-center gap-2">
+                           <Lock className="w-4 h-4"/> Overall Private Evaluation Notes
+                         </h4>
+                         <p className="text-xs text-stone-400 mb-4">These notes are strictly for management evaluation and will not be visible to the employee.</p>
+                         
+                         <textarea
+                           value={supervisorOverallDrafts[`${student.id}_${activeCertId}`] ?? (student.supervisorOverallNotes?.[activeCertId] || '')}
+                           onChange={(e) => setSupervisorOverallDrafts(prev => ({ ...prev, [`${student.id}_${activeCertId}`]: e.target.value }))}
+                           placeholder="Add overall performance evaluation or private notes..."
+                           className="w-full bg-[#171311] text-white placeholder-stone-600 border border-stone-800 rounded-2xl p-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#d4b09e] transition-all min-h-[100px] resize-none mb-4"
+                         />
+                         <button
+                           onClick={() => handleSaveSupervisorOverallNote(student.id, activeCertId)}
+                           className="w-fit bg-[#302624] hover:bg-stone-600 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-sm text-sm flex justify-center items-center gap-2"
+                         >
+                           <Save className="w-4 h-4" /> Save Overall Private Note
+                         </button>
+                      </div>
+
                     </div>
                   )}
                 </div>
@@ -1736,47 +2225,48 @@ export default function App() {
     );
   };
 
-  const renderCertificate = () => (
-    <div className="max-w-4xl mx-auto space-y-6 mt-8">
-      <div className="flex justify-between items-center print:hidden px-4">
-        <button onClick={() => setAppState('student-dash')} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </button>
-        {/* Certificate remains light-themed for actual printing purposes */}
-        <button onClick={() => window.print()} className="bg-white hover:bg-stone-200 text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm">
-          <Printer className="w-4 h-4"/> Print Certificate
-        </button>
-      </div>
-      
-      {/* We force this specific card to be bright/white so it looks like a real paper certificate, even in the dark app theme */}
-      <div className="bg-[#FAF9F6] p-12 md:p-20 border-[16px] border-[#2C1A14] rounded-3xl shadow-2xl text-center print:shadow-none print:m-0 print:border-8 print:rounded-none">
-        <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-8 border border-stone-200 shadow-sm">
-          <Award className="w-12 h-12 text-[#8B4828]" />
+  const renderCertificate = () => {
+    // ... logic remains identical
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 mt-8">
+        <div className="flex justify-between items-center print:hidden px-4">
+          <button onClick={() => setAppState('student-dash')} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </button>
+          <button onClick={() => window.print()} className="bg-white hover:bg-stone-200 text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm">
+            <Printer className="w-4 h-4"/> Print Certificate
+          </button>
         </div>
-        <h1 className="text-4xl md:text-6xl font-serif text-[#2C1A14] mb-3">Certificate of Completion</h1>
-        <p className="text-lg md:text-xl text-[#8B4828] tracking-widest uppercase mb-16 font-bold">{activeCert.title}</p>
         
-        <p className="text-lg text-stone-600 mb-4 font-serif italic">This certifies that</p>
-        <h2 className="text-4xl md:text-5xl font-bold text-black mb-8 border-b-2 border-stone-200 inline-block px-16 pb-3">{currentUser?.name}</h2>
-        <p className="text-lg text-stone-700 max-w-2xl mx-auto leading-relaxed mb-20">
-          has successfully completed all theoretical coursework, device operation protocol, safety training, and hands-on practical requirements necessary to earn certification for {activeCert.title} at SELFishly Aesthetics & Wellness.
-        </p>
-
-        <div className="flex justify-around items-end pt-12 border-t border-stone-200">
-          <div className="text-center">
-            <p className="text-xl font-bold text-black font-serif italic">{currentSignoff?.by}</p>
-            <div className="w-56 h-px bg-stone-300 my-3 mx-auto"></div>
-            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Clinical Supervisor</p>
+        <div className="bg-[#FAF9F6] p-12 md:p-20 border-[16px] border-[#2C1A14] rounded-3xl shadow-2xl text-center print:shadow-none print:m-0 print:border-8 print:rounded-none">
+          <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-8 border border-stone-200 shadow-sm">
+            <Award className="w-12 h-12 text-[#8B4828]" />
           </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-black">{currentSignoff?.at ? new Date(currentSignoff.at).toLocaleDateString() : 'N/A'}</p>
-            <div className="w-56 h-px bg-stone-300 my-3 mx-auto"></div>
-            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Date of Certification</p>
+          <h1 className="text-4xl md:text-6xl font-serif text-[#2C1A14] mb-3">Certificate of Completion</h1>
+          <p className="text-lg md:text-xl text-[#8B4828] tracking-widest uppercase mb-16 font-bold">{activeCert.title}</p>
+          
+          <p className="text-lg text-stone-600 mb-4 font-serif italic">This certifies that</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-8 border-b-2 border-stone-200 inline-block px-16 pb-3">{currentUser?.name}</h2>
+          <p className="text-lg text-stone-700 max-w-2xl mx-auto leading-relaxed mb-20">
+            has successfully completed all theoretical coursework, device operation protocol, safety training, and hands-on practical requirements necessary to earn certification for {activeCert.title} at SELFishly Aesthetics & Wellness.
+          </p>
+
+          <div className="flex justify-around items-end pt-12 border-t border-stone-200">
+            <div className="text-center">
+              <p className="text-xl font-bold text-black font-serif italic">{currentSignoff?.by}</p>
+              <div className="w-56 h-px bg-stone-300 my-3 mx-auto"></div>
+              <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Clinical Supervisor</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-black">{currentSignoff?.at ? new Date(currentSignoff.at).toLocaleDateString() : 'N/A'}</p>
+              <div className="w-56 h-px bg-stone-300 my-3 mx-auto"></div>
+              <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Date of Certification</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#171311] font-sans text-stone-100 selection:bg-[#8B4828] selection:text-white">
