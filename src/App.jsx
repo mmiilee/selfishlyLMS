@@ -2394,10 +2394,10 @@ export default function App() {
                   <span className="text-3xl font-bold text-white mb-3">{totalModulesPassed}</span>
                   <p className="text-emerald-500 text-xs flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> {recentActivities.filter(a => a.type === 'success').length} recently</p>
                 </div>
-                <div className="bg-[#171311] border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between">
+                <div onClick={() => setSupervisorActiveTab('certifications')} className="bg-[#171311] border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between cursor-pointer hover:border-[#8B4828] hover:bg-[#1a1210] transition-all group">
                   <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-4">Ready for Sign-off</p>
                   <span className="text-3xl font-bold text-white mb-3">{totalReady}</span>
-                  <p className="text-stone-500 text-xs flex items-center gap-1.5"><Clock className="w-3 h-3"/> Awaiting review</p>
+                  <p className="text-[#8B4828] text-xs flex items-center gap-1.5"><Clock className="w-3 h-3"/> Click to review →</p>
                 </div>
                 <div className="bg-[#171311] border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between">
                   <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-4">Certified Providers</p>
