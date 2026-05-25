@@ -2237,6 +2237,7 @@ export default function App() {
       let status = 'JUST ENROLLED';
       if (isCertified) status = 'CERTIFIED';
       else if (isReady) status = 'AWAITING REVIEW';
+      else if (CERTIFICATIONS.some(c => c.modules.every(m => (student.theoreticalProgress || {})[m.id] === 'passed') && !student.signoffs?.[c.id])) status = 'THEORY COMPLETE';
       else if (score > 0) status = 'IN PROGRESS';
 
       // Gather track names for the roster display
@@ -2343,8 +2344,23 @@ export default function App() {
         {/* Supervisor Main Content */}
         <div className="flex-grow flex flex-col gap-6 w-full max-w-full overflow-hidden">
           
-          {supervisorActiveTab === 'dashboard' ? (
+        {supervisorActiveTab === 'dashboard' ? (
             <>
+              {studentStats.some(s => s.status === 'THEORY COMPLETE' || s.status === 'AWAITING REVIEW') && (
+                <div className="bg-[#2a1810] border border-[#8B4828] rounded-2xl p-4 flex items-start gap-4 mb-2">
+                  <AlertOctagon className="w-5 h-5 text-[#d4b09e] shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-white mb-1">Action Required</p>
+                    <div className="flex flex-wrap gap-2">
+                      {studentStats.filter(s => s.status === 'THEORY COMPLETE' || s.status === 'AWAITING REVIEW').map(s => (
+                        <span key={s.id} className="text-xs text-[#d4b09e] bg-[#8B4828]/20 border border-[#8B4828]/40 px-3 py-1 rounded-full font-semibold">
+                          {s.id} — {s.status === 'THEORY COMPLETE' ? 'Theory done, needs practical sign-off' : 'Ready for full certification'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Dashboard Top Banner */}
               <div className="bg-gradient-to-br from-[#1c1410] to-[#120a07] border border-stone-800 rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div className="relative z-10">
@@ -2492,18 +2508,21 @@ export default function App() {
                       let badgeClasses = "text-stone-400 border-stone-800";
                       let badgeIcon = <Circle className="w-3.5 h-3.5" />;
                       if (student.status === 'CERTIFIED') {
-                        badgeClasses = "text-emerald-500 border-emerald-900/50 bg-emerald-950/20";
-                        badgeIcon = <CheckCircle className="w-3.5 h-3.5" />;
-                      } else if (student.status === 'IN PROGRESS') {
-                        badgeClasses = "text-yellow-500 border-yellow-900/50 bg-yellow-950/20";
-                        badgeIcon = <Clock className="w-3.5 h-3.5" />;
-                      } else if (student.status === 'AWAITING REVIEW') {
-                        badgeClasses = "text-white border-[#8B4828] bg-[#8B4828]";
-                        badgeIcon = <AlertOctagon className="w-3.5 h-3.5" />;
-                      } else {
-                        badgeClasses = "text-blue-400 border-blue-900/50 bg-blue-950/20";
-                        badgeIcon = <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mx-1"></div>;
-                      }
+  badgeClasses = "text-emerald-500 border-emerald-900/50 bg-emerald-950/20";
+  badgeIcon = <CheckCircle className="w-3.5 h-3.5" />;
+} else if (student.status === 'AWAITING REVIEW') {
+  badgeClasses = "text-white border-[#8B4828] bg-[#8B4828]";
+  badgeIcon = <AlertOctagon className="w-3.5 h-3.5" />;
+} else if (student.status === 'THEORY COMPLETE') {
+  badgeClasses = "text-purple-300 border-purple-800 bg-purple-950/30";
+  badgeIcon = <Award className="w-3.5 h-3.5" />;
+} else if (student.status === 'IN PROGRESS') {
+  badgeClasses = "text-yellow-500 border-yellow-900/50 bg-yellow-950/20";
+  badgeIcon = <Clock className="w-3.5 h-3.5" />;
+} else {
+  badgeClasses = "text-blue-400 border-blue-900/50 bg-blue-950/20";
+  badgeIcon = <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mx-1"></div>;
+}
 
                       return (
                         <div key={student.id} className="overflow-hidden">
