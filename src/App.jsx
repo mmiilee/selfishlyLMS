@@ -2276,7 +2276,11 @@ export default function App() {
     const totalEnrolled = studentStats.length;
     const overallCompletion = studentStats.length ? Math.round(studentStats.reduce((acc, s) => acc + s.score, 0) / studentStats.length) : 0;
     const totalModulesPassed = studentStats.reduce((acc, s) => acc + s.totalPassed, 0);
-    const totalReady = studentStats.filter(s => s.isReady).length;
+    const totalReady = studentStats.filter(s => 
+      CERTIFICATIONS.some(c => 
+        c.modules.every(m => (s.theoreticalProgress || {})[m.id] === 'passed') && !s.signoffs?.[c.id]
+      )
+    ).length;
     const totalCertified = studentStats.filter(s => s.isCertified).length;
 
     // Track Completions Average
@@ -2373,8 +2377,8 @@ export default function App() {
                   <p className="text-stone-400 text-sm leading-relaxed max-w-xs">Real-time provider certification and practical readiness across both tracks.</p>
                 </div>
                 <div className="relative z-10 text-right shrink-0 pr-4 sm:pr-8">
-                  <span className="text-5xl sm:text-6xl font-bold text-white block mb-1">{overallCompletion}%</span>
-                  <span className="text-[#8B4828] text-[10px] uppercase font-bold tracking-widest block">Overall<br/>Completion</span>
+                <span className="text-5xl sm:text-6xl font-bold text-white block mb-1">{totalModulesPassed}</span>
+                <span className="text-[#8B4828] text-[10px] uppercase font-bold tracking-widest block">Total Modules<br/>Passed</span>
                 </div>
               </div>
 
@@ -2407,7 +2411,7 @@ export default function App() {
                 
                 {/* Track Completion Card */}
                 <div className="bg-[#171311] border border-stone-800 rounded-3xl p-8 shadow-md">
-                  <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-8">Track Completion</p>
+                <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-8">Theory Progress by Track</p>
                   <div className="space-y-8">
                     <div>
                       <div className="flex justify-between items-end mb-2">
