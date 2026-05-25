@@ -3116,13 +3116,14 @@ export default function App() {
             {isSigned ? (
               <span className="text-[10px] font-bold text-emerald-400 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1 rounded">Certified</span>
             ) : (
-              <button onClick={() => { 
-                setSupervisorActiveTab('providers');
-                setTimeout(() => {
-                  const el = document.getElementById(`provider-${student.id}`);
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 150);
-              }} className="text-xs font-bold text-stone-400 hover:text-white border border-stone-700 hover:border-stone-500 px-3 py-1.5 rounded-lg transition-colors">View Profile</button>
+<button onClick={() => { 
+  setExpandedStudentId(student.id);
+  setSupervisorActiveTab('providers');
+  setTimeout(() => {
+    const el = document.getElementById(`provider-${student.id}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}} className="text-xs font-bold text-stone-400 hover:text-white border border-stone-700 hover:border-stone-500 px-3 py-1.5 rounded-lg transition-colors">View Profile</button>
             )}
           </div>
         );
