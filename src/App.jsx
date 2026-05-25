@@ -2556,14 +2556,49 @@ export default function App() {
                                 <h4 className="font-bold text-white flex items-center gap-2">
                                   <User className="w-4 h-4 text-[#d4b09e]"/> Detailed Provider View
                                 </h4>
-                                {student.status === 'AWAITING REVIEW' && (
-                                  <button 
-                                    onClick={() => { setSelectedStudentForSignoff(student); setAppState('signoff'); window.scrollTo(0,0); }}
-                                    className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-5 py-2 rounded-lg font-bold text-xs transition-colors"
-                                  >
-                                    Begin Sign-Off
-                                  </button>
-                                )}
+                                {(() => {
+  const allPracDone = CERTIFICATIONS.every(cert =>
+    cert.practical.every(p => (student.practicalChecklist || {})[p.id] === true)
+  );
+  const allModsDone = CERTIFICATIONS.every(cert =>
+    cert.modules.every(m => (student.theoreticalProgress || {})[m.id] === 'passed')
+  );
+  const alreadyCertified = CERTIFICATIONS.some(c => student.signoffs?.[c.id]);
+
+  if (alreadyCertified) {
+    return (
+      <button
+        onClick={() => { setActiveCertId(Object.keys(student.signoffs)[0]); setSelectedStudentForSignoff(student); setAppState('certificate'); window.scrollTo(0,0); }}
+        className="bg-emerald-700 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold text-xs transition-colors flex items-center gap-2"
+      >
+        <Award className="w-3.5 h-3.5" /> View Certificate
+      </button>
+    );
+  }
+
+  if (allModsDone && allPracDone) {
+    return (
+      <button
+        onClick={() => { setSelectedStudentForSignoff(student); setAppState('signoff'); window.scrollTo(0,0); }}
+        className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-5 py-2 rounded-lg font-bold text-xs transition-colors flex items-center gap-2 animate-pulse"
+      >
+        <Award className="w-3.5 h-3.5" /> Ready — Sign Off Now
+      </button>
+    );
+  }
+
+  if (allModsDone && !allPracDone) {
+    const totalPrac = CERTIFICATIONS.reduce((a, c) => a + c.practical.length, 0);
+    const donePrac = CERTIFICATIONS.reduce((a, c) => a + c.practical.filter(p => (student.practicalChecklist || {})[p.id]).length, 0);
+    return (
+      <span className="text-xs text-purple-300 border border-purple-800 bg-purple-950/30 px-3 py-1.5 rounded-lg font-bold">
+        Theory ✓ — Practicals {donePrac}/{totalPrac}
+      </span>
+    );
+  }
+
+  return null;
+})()}
                               </div>
                               
                               <div className="space-y-8">
