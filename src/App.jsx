@@ -3200,7 +3200,6 @@ export default function App() {
           </div>
         </div>
       </div>
-    );
   };
 
   const renderCertificate = () => {
@@ -3302,4 +3301,3 @@ export default function App() {
       <ReadingModal />
     </div>
   );
-}
