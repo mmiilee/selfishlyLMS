@@ -2536,7 +2536,7 @@ export default function App() {
 }
 
                       return (
-                        <div key={student.id} className="overflow-hidden">
+                            <div key={student.id} id={`student-row-${student.id}`} className="overflow-hidden">
                           <div 
                             onClick={() => setExpandedStudentId(isExpanded ? null : student.id)}
                             className={`p-6 sm:px-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 transition-colors cursor-pointer hover:bg-[#231C1A] ${isExpanded ? 'bg-[#231C1A]' : ''}`}
@@ -3114,7 +3114,14 @@ export default function App() {
             {isSigned ? (
               <span className="text-[10px] font-bold text-emerald-400 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1 rounded">Certified</span>
             ) : (
-              <button onClick={() => { setExpandedStudentId(student.id); setSupervisorActiveTab('dashboard'); window.scrollTo(0,0); }} className="text-xs font-bold text-stone-400 hover:text-white border border-stone-700 hover:border-stone-500 px-3 py-1.5 rounded-lg transition-colors">View Profile</button>
+              <button onClick={() => { 
+                setExpandedStudentId(student.id); 
+                setSupervisorActiveTab('dashboard'); 
+                setTimeout(() => {
+                  const el = document.getElementById(`student-row-${student.id}`);
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+              }} className="text-xs font-bold text-stone-400 hover:text-white border border-stone-700 hover:border-stone-500 px-3 py-1.5 rounded-lg transition-colors">View Profile</button>
             )}
           </div>
         );
