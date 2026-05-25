@@ -2649,18 +2649,114 @@ export default function App() {
                 )}
               </div>
             </>
-          ) : (
-            /* Tab Content for Roster Focus (If clicking LHR or Tattoo specifically from sidebar) */
-            <div className="bg-[#171311] rounded-3xl shadow-xl border border-stone-800 overflow-hidden">
-              <div className="px-8 py-6 border-b border-stone-800 bg-[#231C1A] flex items-center gap-3">
-                <h2 className="font-bold text-white text-lg tracking-wide">Detailed Review: <span className="text-[#d4b09e]">{activeCert.title}</span></h2>
-              </div>
-              <div className="p-8 text-stone-400">
-                <p>You are viewing the deep-dive roster for {activeCert.title}. Use the main Dashboard tab to see the high-level overview across all certifications.</p>
-                <button onClick={() => setSupervisorActiveTab('dashboard')} className="mt-4 bg-[#8B4828] text-white px-5 py-2.5 rounded-xl text-sm font-bold">Return to Dashboard</button>
-              </div>
+         ) : supervisorActiveTab === 'providers' ? (
+          <div className="flex flex-col gap-6">
+            <div className="bg-[#8B4828] rounded-3xl p-8 text-white shadow-xl">
+              <h2 className="text-3xl font-bold tracking-tight">Provider Statistics</h2>
+              <p className="text-[#e8d5cc] text-sm mt-2">Detailed breakdown of every employee — time spent, quiz performance, and missed questions.</p>
             </div>
-          )}
+            {allStudents.length === 0 ? (
+              <div className="bg-[#171311] border border-stone-800 rounded-3xl p-16 text-center text-stone-500">No providers have registered yet.</div>
+            ) : (
+              allStudents.map(student => {
+                const totalMods = CERTIFICATIONS.reduce((a, c) => a + c.modules.length, 0);
+                const passed = CERTIFICATIONS.reduce((a, c) => a + c.modules.filter(m => (student.theoreticalProgress || {})[m.id] === 'passed').length, 0);
+                const totalTime = Object.values(student.moduleTimeSpent || {}).reduce((a, b) => a + b, 0);
+                const totalAttempts = Object.values(student.quizPerformance || {}).reduce((a, b) => a + (b.attempts || 0), 0);
+                const totalMistakes = Object.values(student.quizPerformance || {}).reduce((a, b) => a + Object.values(b.mistakes || {}).reduce((x, y) => x + y, 0), 0);
+                return (
+                  <div key={student.id} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden shadow-lg">
+                    <div className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-lg border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
+                        <div>
+                          <h3 className="font-bold text-white text-lg">{student.id}</h3>
+                          <p className="text-xs text-stone-500">{passed}/{totalMods} modules passed</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-6 text-center">
+                        <div>
+                          <p className="text-xl font-bold text-white">{formatTime(totalTime)}</p>
+                          <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Total Time</p>
+                        </div>
+                        <div>
+                          <p className="text-xl font-bold text-white">{totalAttempts}</p>
+                          <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Quiz Attempts</p>
+                        </div>
+                        <div>
+                          <p className="text-xl font-bold text-rose-400">{totalMistakes}</p>
+                          <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Total Mistakes</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {CERTIFICATIONS.flatMap(cert => cert.modules).map(mod => {
+                        const isPassed = (student.theoreticalProgress || {})[mod.id] === 'passed';
+                        const stats = (student.quizPerformance || {})[mod.id] || { attempts: 0, mistakes: {} };
+                        const timeSpent = (student.moduleTimeSpent || {})[mod.id] || 0;
+                        const mistakeCount = Object.values(stats.mistakes || {}).reduce((a, b) => a + b, 0);
+                        return (
+                          <div key={mod.id} className={`bg-[#231C1A] border rounded-2xl p-5 ${isPassed ? 'border-[#8B4828]/40' : 'border-stone-800'}`}>
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex-1 pr-3">
+                                <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">{mod.track}</p>
+                                <h4 className="font-bold text-white text-sm leading-snug">{mod.title}</h4>
+                              </div>
+                              {isPassed ? <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-1"/> : <Circle className="w-4 h-4 text-stone-600 shrink-0 mt-1"/>}
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 mb-4">
+                              <div className="bg-[#171311] rounded-xl p-3 text-center border border-stone-800">
+                                <p className="text-sm font-bold text-white">{formatTime(timeSpent)}</p>
+                                <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Time Spent</p>
+                              </div>
+                              <div className="bg-[#171311] rounded-xl p-3 text-center border border-stone-800">
+                                <p className="text-sm font-bold text-white">{stats.attempts}</p>
+                                <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Attempts</p>
+                              </div>
+                              <div className="bg-[#171311] rounded-xl p-3 text-center border border-stone-800">
+                                <p className={`text-sm font-bold ${mistakeCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{mistakeCount}</p>
+                                <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Mistakes</p>
+                              </div>
+                            </div>
+                            {stats.mistakes && Object.keys(stats.mistakes).length > 0 && (
+                              <div className="bg-rose-950/20 border border-rose-900/30 rounded-xl p-4">
+                                <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-3">Missed Questions</p>
+                                <div className="space-y-3">
+                                  {Object.entries(stats.mistakes).map(([questionId, count]) => {
+                                    const question = CERTIFICATIONS.flatMap(c => c.modules).flatMap(m => m.questions).find(q => q.id === questionId);
+                                    return question ? (
+                                      <div key={questionId} className="pb-3 border-b border-rose-900/20 last:border-0 last:pb-0">
+                                        <p className="text-[11px] text-rose-200 leading-relaxed mb-1">"{question.text}"</p>
+                                        <div className="flex items-center justify-between">
+                                          <p className="text-[10px] text-rose-400 font-bold">{count}x incorrect</p>
+                                          <p className="text-[10px] text-stone-500">Correct: "{question.options[question.correctIndex]}"</p>
+                                        </div>
+                                      </div>
+                                    ) : null;
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="bg-[#171311] rounded-3xl shadow-xl border border-stone-800 overflow-hidden">
+            <div className="px-8 py-6 border-b border-stone-800 bg-[#231C1A] flex items-center gap-3">
+              <h2 className="font-bold text-white text-lg tracking-wide">Detailed Review: <span className="text-[#d4b09e]">{activeCert.title}</span></h2>
+            </div>
+            <div className="p-8 text-stone-400">
+              <p>You are viewing the deep-dive roster for {activeCert.title}. Use the main Dashboard tab to see the high-level overview across all certifications.</p>
+              <button onClick={() => setSupervisorActiveTab('dashboard')} className="mt-4 bg-[#8B4828] text-white px-5 py-2.5 rounded-xl text-sm font-bold">Return to Dashboard</button>
+            </div>
+          </div>
+        )}
         </div>
       </div>
     );
