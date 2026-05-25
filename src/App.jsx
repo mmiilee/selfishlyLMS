@@ -2581,6 +2581,23 @@ export default function App() {
                                                 )}
                                               </div>
                                               <p className="text-[10px] text-stone-500 mb-3">Attempts: {stats.attempts} | Time: {formatTime(student.moduleTimeSpent?.[mod.id])}</p>
+
+{stats.mistakes && Object.keys(stats.mistakes).length > 0 && (
+  <div className="mb-3 bg-rose-950/20 border border-rose-900/30 rounded-lg p-3">
+    <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-2">Questions Missed</p>
+    {Object.entries(stats.mistakes).map(([questionId, count]) => {
+      const allModules = CERTIFICATIONS.flatMap(c => c.modules);
+      const mod = allModules.find(m => m.questions?.some(q => q.id === questionId));
+      const question = mod?.questions?.find(q => q.id === questionId);
+      return question ? (
+        <div key={questionId} className="mb-2 pb-2 border-b border-rose-900/20 last:border-0 last:mb-0 last:pb-0">
+          <p className="text-[10px] text-rose-300 leading-relaxed">"{question.text}"</p>
+          <p className="text-[9px] text-rose-500 mt-1 font-bold">{count}x incorrect</p>
+        </div>
+      ) : null;
+    })}
+  </div>
+)}
                                               
                                               <textarea
                                                 value={currentDraft}
