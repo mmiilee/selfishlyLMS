@@ -2815,6 +2815,48 @@ export default function App() {
                           </div>
                         );
                       })}
+                      {CERTIFICATIONS.filter(cert => student.signoffs?.[cert.id]).length > 0 && (
+  <div className="px-6 pb-6">
+    <p className="text-[10px] font-bold text-[#d4b09e] uppercase tracking-widest mb-4">Earned Certifications</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {CERTIFICATIONS.filter(cert => student.signoffs?.[cert.id]).map(cert => {
+        const signoff = student.signoffs[cert.id];
+        return (
+          <div key={cert.id} className="bg-[#f5ede0] border-2 border-[#8B4828] rounded-2xl overflow-hidden">
+            <div className="bg-[#2C1A14] h-1.5 w-full"></div>
+            <div className="p-5 text-center">
+              <div className="w-10 h-10 bg-[#2C1A14] rounded-lg border border-[#8B4828] flex items-center justify-center mx-auto mb-3">
+                <img src="/favicon.png" className="w-8 h-8 rounded-md object-cover" alt="SELFishly" />
+              </div>
+              <p style={{fontFamily:'Georgia,serif'}} className="text-[8px] tracking-[0.25em] uppercase text-[#8B4828] font-bold mb-1">SELFishly Aesthetics & Wellness</p>
+              <p style={{fontFamily:'Georgia,serif'}} className="text-base font-bold text-[#2C1A14] italic mb-1">{student.id}</p>
+              <div className="w-16 h-px bg-[#8B4828] mx-auto mb-2"></div>
+              <p style={{fontFamily:'Georgia,serif'}} className="text-[10px] font-bold text-[#2C1A14] tracking-widest uppercase mb-3">{cert.title}</p>
+              <div className="flex justify-center mb-3">
+                <svg width="36" height="36" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <radialGradient id={`wax-${cert.id}-${student.id}`} cx="40%" cy="35%" r="60%">
+                      <stop offset="0%" stopColor="#a85a36"/>
+                      <stop offset="60%" stopColor="#8B4828"/>
+                      <stop offset="100%" stopColor="#5a2810"/>
+                    </radialGradient>
+                  </defs>
+                  <polygon points="40,2 48,14 62,10 62,25 75,32 68,45 75,58 62,62 62,70 48,66 40,78 32,66 18,70 18,62 5,58 12,45 5,32 18,25 18,10 32,14" fill={`url(#wax-${cert.id}-${student.id})`} stroke="#5a2810" strokeWidth="0.5"/>
+                  <circle cx="40" cy="40" r="26" fill="none" stroke="#f5ede0" strokeWidth="1" opacity="0.5"/>
+                  <text x="40" y="38" textAnchor="middle" fontFamily="Georgia, serif" fontSize="11" fontWeight="700" fill="#f5ede0" letterSpacing="1">S·A·W</text>
+                  <text x="40" y="52" textAnchor="middle" fontFamily="Georgia, serif" fontSize="7" fill="#f5ede0" letterSpacing="1" opacity="0.9">2024</text>
+                </svg>
+              </div>
+              <p className="text-[9px] text-[#8B4828] font-bold uppercase tracking-widest mb-1">Signed off by {signoff?.by}</p>
+              <p className="text-[9px] text-[#a07050]">{signoff?.at ? new Date(signoff.at).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) : ''}</p>
+            </div>
+            <div className="bg-[#2C1A14] h-1.5 w-full"></div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
                     </div>
                   </div>
                 );
@@ -3204,7 +3246,148 @@ export default function App() {
   };
    
   const renderCertificate = () => {
+    const WaxSeal = () => (
+      <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+        <defs>
+          <radialGradient id="waxGrad" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stopColor="#a85a36"/>
+            <stop offset="60%" stopColor="#8B4828"/>
+            <stop offset="100%" stopColor="#5a2810"/>
+          </radialGradient>
+        </defs>
+        <polygon points="40,2 48,14 62,10 62,25 75,32 68,45 75,58 62,62 62,70 48,66 40,78 32,66 18,70 18,62 5,58 12,45 5,32 18,25 18,10 32,14" fill="url(#waxGrad)" stroke="#5a2810" strokeWidth="0.5"/>
+        <circle cx="40" cy="40" r="26" fill="none" stroke="#f5ede0" strokeWidth="1" opacity="0.4"/>
+        <circle cx="40" cy="40" r="22" fill="none" stroke="#f5ede0" strokeWidth="0.5" opacity="0.3"/>
+        <text x="40" y="36" textAnchor="middle" fontFamily="Georgia, serif" fontSize="11" fontWeight="700" fill="#f5ede0" letterSpacing="1">S·A·W</text>
+        <text x="40" y="50" textAnchor="middle" fontFamily="Georgia, serif" fontSize="7" fill="#f5ede0" letterSpacing="2" opacity="0.9">EST. 2024</text>
+        <line x1="22" y1="42" x2="34" y2="42" stroke="#f5ede0" strokeWidth="0.5" opacity="0.5"/>
+        <line x1="46" y1="42" x2="58" y2="42" stroke="#f5ede0" strokeWidth="0.5" opacity="0.5"/>
+      </svg>
+    );
+
+    const CertificateBody = ({ studentName, certTitle, supervisorName, signoffDate }) => (
+      <div className="bg-[#f5ede0] border-[3px] border-[#2C1A14]">
+        <div className="bg-[#2C1A14] h-2 w-full"></div>
+        <div className="border-l-[8px] border-r-[8px] border-[#2C1A14] px-8">
+          <div className="border-l-2 border-r-2 border-[#8B4828] px-8 py-10 text-center">
+
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+              <div className="w-1.5 h-1.5 bg-[#8B4828] rotate-45 flex-shrink-0"></div>
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+              <div className="w-1.5 h-1.5 bg-[#8B4828] rotate-45 flex-shrink-0"></div>
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 mb-5">
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-10 h-px bg-[#8B4828]"></div>
+                <div className="w-7 h-px bg-[#8B4828]"></div>
+                <div className="w-4 h-px bg-[#8B4828]"></div>
+              </div>
+              <div className="w-16 h-16 bg-[#2C1A14] rounded-lg border-2 border-[#8B4828] flex items-center justify-center flex-shrink-0">
+                <img src="/favicon.png" className="w-12 h-12 rounded-md object-cover" alt="SELFishly" />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-10 h-px bg-[#8B4828]"></div>
+                <div className="w-7 h-px bg-[#8B4828]"></div>
+                <div className="w-4 h-px bg-[#8B4828]"></div>
+              </div>
+            </div>
+
+            <p style={{fontFamily: 'Georgia, serif'}} className="text-[10px] tracking-[0.35em] uppercase text-[#8B4828] font-bold mb-1">SELFishly Aesthetics & Wellness</p>
+            <p style={{fontFamily: 'Georgia, serif'}} className="text-[9px] tracking-[0.2em] uppercase text-[#a07050] mb-6">Clinical Learning Management System</p>
+
+            <div className="flex items-center gap-2 mb-7">
+              <div className="flex-1 h-px bg-[#c49a7a]"></div>
+              <div className="w-1 h-1 bg-[#c49a7a] rotate-45"></div>
+              <div className="flex-1 h-px bg-[#c49a7a]"></div>
+            </div>
+
+            <p style={{fontFamily: 'Georgia, serif'}} className="text-xl font-bold text-[#2C1A14] tracking-wide mb-1">Certificate of Clinical Excellence</p>
+            <p style={{fontFamily: 'Georgia, serif'}} className="italic text-sm text-[#7a5540] mb-7">Know all persons by these presents that</p>
+
+            <p style={{fontFamily: 'Georgia, serif'}} className="text-5xl text-[#2C1A14] italic mb-1">{studentName}</p>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+              <div className="w-1.5 h-1.5 bg-[#8B4828] rounded-full"></div>
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+            </div>
+
+            <p style={{fontFamily: 'Georgia, serif'}} className="italic text-[13px] text-[#4a3020] leading-loose mb-5">
+              having diligently pursued and faithfully completed all prescribed<br/>
+              theoretical studies, device operation protocol, clinical safety training,<br/>
+              and supervised hands-on practical requirements, is hereby granted
+            </p>
+
+            <div className="bg-[#2C1A14] px-10 py-3 inline-block mb-5">
+              <p style={{fontFamily: 'Georgia, serif'}} className="text-base font-bold text-[#f5ede0] tracking-[0.2em] uppercase">{certTitle}</p>
+            </div>
+
+            <p style={{fontFamily: 'Georgia, serif'}} className="italic text-[13px] text-[#4a3020] leading-loose mb-8">
+              and is duly authorized to practice the foregoing clinical discipline<br/>
+              with full and unsupervised standing at SELFishly Aesthetics & Wellness.
+            </p>
+
+            <div className="flex items-center gap-2 mb-8">
+              <div className="flex-1 h-px bg-[#c49a7a]"></div>
+              <div className="w-1 h-1 bg-[#c49a7a] rotate-45"></div>
+              <div className="w-1 h-1 bg-[#c49a7a] rotate-45"></div>
+              <div className="w-1 h-1 bg-[#c49a7a] rotate-45"></div>
+              <div className="flex-1 h-px bg-[#c49a7a]"></div>
+            </div>
+
+            <div className="flex justify-around items-end gap-4 mb-8">
+              <div className="text-center flex-1">
+                <p style={{fontFamily: 'Georgia, serif'}} className="italic text-lg text-[#2C1A14] font-bold mb-1.5">{supervisorName}</p>
+                <div className="h-px bg-[#8B4828] mb-1.5"></div>
+                <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-[#8B4828]">Clinical Supervisor</p>
+              </div>
+              <WaxSeal />
+              <div className="text-center flex-1">
+                <p style={{fontFamily: 'Georgia, serif'}} className="text-lg text-[#2C1A14] font-bold mb-1.5">{signoffDate}</p>
+                <div className="h-px bg-[#8B4828] mb-1.5"></div>
+                <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-[#8B4828]">Date of Certification</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+              <div className="w-1.5 h-1.5 bg-[#8B4828] rotate-45 flex-shrink-0"></div>
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+              <div className="w-1.5 h-1.5 bg-[#8B4828] rotate-45 flex-shrink-0"></div>
+              <div className="flex-1 h-px bg-[#8B4828]"></div>
+            </div>
+
+          </div>
+        </div>
+        <div className="bg-[#2C1A14] h-2 w-full"></div>
+      </div>
+    );
+
     return (
+      <div className="max-w-3xl mx-auto space-y-6 mt-8 px-4 pb-16">
+        <div className="flex justify-between items-center print:hidden">
+          <button onClick={() => {
+            if (currentUser.role === 'supervisor') setAppState('supervisor-dash');
+            else setAppState('student-dash');
+          }} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </button>
+          <button onClick={() => window.print()} className="bg-white hover:bg-stone-200 text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm">
+            <Printer className="w-4 h-4"/> Print Certificate
+          </button>
+        </div>
+
+        <CertificateBody
+          studentName={currentUser?.name}
+          certTitle={activeCert.title}
+          supervisorName={currentSignoff?.by || '—'}
+          signoffDate={currentSignoff?.at ? new Date(currentSignoff.at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+        />
+      </div>
+    );
+  };
       <div className="max-w-4xl mx-auto space-y-6 mt-8">
         <div className="flex justify-between items-center print:hidden px-4">
           <button onClick={() => {
@@ -3245,7 +3428,6 @@ export default function App() {
           </div>
         </div>
       </div>
-    );
   };
 
   return (
@@ -3301,4 +3483,4 @@ export default function App() {
       {/* Global Modals */}
       <ReadingModal />
     </div>
-      )}    
+      )  
