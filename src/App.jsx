@@ -2310,8 +2310,8 @@ export default function App() {
             >
               <Users className="w-4 h-4"/> Providers
             </button>
-            <button className="flex items-center gap-3 w-full p-3 rounded-xl font-bold text-stone-400 hover:text-white transition-all"><Award className="w-4 h-4"/> Certifications</button>
-            <button className="flex items-center gap-3 w-full p-3 rounded-xl font-bold text-stone-400 hover:text-white transition-all"><CheckSquare className="w-4 h-4"/> Practical tasks</button>
+            <button onClick={() => { setSupervisorActiveTab('certifications'); setExpandedStudentId(null); }} className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${supervisorActiveTab === 'certifications' ? 'bg-[#231C1A] text-[#d4b09e]' : 'text-stone-400 hover:text-white'}`}><Award className="w-4 h-4"/> Certifications</button>
+            <button onClick={() => { setSupervisorActiveTab('practical'); setExpandedStudentId(null); }} className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${supervisorActiveTab === 'practical' ? 'bg-[#231C1A] text-[#d4b09e]' : 'text-stone-400 hover:text-white'}`}><CheckSquare className="w-4 h-4"/> Practical tasks</button>
           </div>
 
           <div>
@@ -2800,17 +2800,239 @@ export default function App() {
               })
             )}
           </div>
-        ) : (
-          <div className="bg-[#171311] rounded-3xl shadow-xl border border-stone-800 overflow-hidden">
-            <div className="px-8 py-6 border-b border-stone-800 bg-[#231C1A] flex items-center gap-3">
-              <h2 className="font-bold text-white text-lg tracking-wide">Detailed Review: <span className="text-[#d4b09e]">{activeCert.title}</span></h2>
+ ) : supervisorActiveTab === 'providers' ? (
+  <div className="flex flex-col gap-6">
+    <div className="bg-[#8B4828] rounded-3xl p-8 text-white shadow-xl">
+      <h2 className="text-3xl font-bold tracking-tight">Provider Statistics</h2>
+      <p className="text-[#e8d5cc] text-sm mt-2">Detailed breakdown of every employee — time spent, quiz performance, and missed questions.</p>
+    </div>
+    {allStudents.length === 0 ? (
+      <div className="bg-[#171311] border border-stone-800 rounded-3xl p-16 text-center text-stone-500">No providers have registered yet.</div>
+    ) : allStudents.map(student => {
+      const totalMods = CERTIFICATIONS.reduce((a, c) => a + c.modules.length, 0);
+      const passed = CERTIFICATIONS.reduce((a, c) => a + c.modules.filter(m => (student.theoreticalProgress || {})[m.id] === 'passed').length, 0);
+      const totalTime = Object.values(student.moduleTimeSpent || {}).reduce((a, b) => a + b, 0);
+      const totalAttempts = Object.values(student.quizPerformance || {}).reduce((a, b) => a + (b.attempts || 0), 0);
+      const totalMistakes = Object.values(student.quizPerformance || {}).reduce((a, b) => a + Object.values(b.mistakes || {}).reduce((x, y) => x + y, 0), 0);
+      return (
+        <div key={student.id} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden shadow-lg">
+          <div className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-lg border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
+              <div>
+                <h3 className="font-bold text-white text-lg">{student.id}</h3>
+                <p className="text-xs text-stone-500">{passed}/{totalMods} modules passed</p>
+              </div>
             </div>
-            <div className="p-8 text-stone-400">
-              <p>You are viewing the deep-dive roster for {activeCert.title}. Use the main Dashboard tab to see the high-level overview across all certifications.</p>
-              <button onClick={() => setSupervisorActiveTab('dashboard')} className="mt-4 bg-[#8B4828] text-white px-5 py-2.5 rounded-xl text-sm font-bold">Return to Dashboard</button>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div><p className="text-xl font-bold text-white">{formatTime(totalTime)}</p><p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Total Time</p></div>
+              <div><p className="text-xl font-bold text-white">{totalAttempts}</p><p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Quiz Attempts</p></div>
+              <div><p className="text-xl font-bold text-rose-400">{totalMistakes}</p><p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Total Mistakes</p></div>
             </div>
           </div>
-        )}
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {CERTIFICATIONS.flatMap(cert => cert.modules).map(mod => {
+              const isPassed = (student.theoreticalProgress || {})[mod.id] === 'passed';
+              const stats = (student.quizPerformance || {})[mod.id] || { attempts: 0, mistakes: {} };
+              const timeSpent = (student.moduleTimeSpent || {})[mod.id] || 0;
+              const mistakeCount = Object.values(stats.mistakes || {}).reduce((a, b) => a + b, 0);
+              return (
+                <div key={mod.id} className={`bg-[#231C1A] border rounded-2xl p-5 ${isPassed ? 'border-[#8B4828]/40' : 'border-stone-800'}`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1 pr-3">
+                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">{mod.track}</p>
+                      <h4 className="font-bold text-white text-sm leading-snug">{mod.title}</h4>
+                    </div>
+                    {isPassed ? <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-1"/> : <Circle className="w-4 h-4 text-stone-600 shrink-0 mt-1"/>}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="bg-[#171311] rounded-xl p-3 text-center border border-stone-800">
+                      <p className="text-sm font-bold text-white">{formatTime(timeSpent)}</p>
+                      <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Time Spent</p>
+                    </div>
+                    <div className="bg-[#171311] rounded-xl p-3 text-center border border-stone-800">
+                      <p className="text-sm font-bold text-white">{stats.attempts}</p>
+                      <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Attempts</p>
+                    </div>
+                    <div className="bg-[#171311] rounded-xl p-3 text-center border border-stone-800">
+                      <p className={`text-sm font-bold ${mistakeCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{mistakeCount}</p>
+                      <p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Mistakes</p>
+                    </div>
+                  </div>
+                  {stats.mistakes && Object.keys(stats.mistakes).length > 0 && (
+                    <div className="bg-rose-950/20 border border-rose-900/30 rounded-xl p-4">
+                      <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider mb-3">Missed Questions</p>
+                      <div className="space-y-3">
+                        {Object.entries(stats.mistakes).map(([questionId, count]) => {
+                          const question = CERTIFICATIONS.flatMap(c => c.modules).flatMap(m => m.questions).find(q => q.id === questionId);
+                          return question ? (
+                            <div key={questionId} className="pb-3 border-b border-rose-900/20 last:border-0 last:pb-0">
+                              <p className="text-[11px] text-rose-200 leading-relaxed mb-1">"{question.text}"</p>
+                              <div className="flex items-center justify-between">
+                                <p className="text-[10px] text-rose-400 font-bold">{count}x incorrect</p>
+                                <p className="text-[10px] text-stone-500">Correct: "{question.options[question.correctIndex]}"</p>
+                              </div>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+) : supervisorActiveTab === 'certifications' ? (
+  <div className="flex flex-col gap-6">
+    <div className="bg-[#8B4828] rounded-3xl p-8 text-white shadow-xl">
+      <h2 className="text-3xl font-bold tracking-tight">Certifications</h2>
+      <p className="text-[#e8d5cc] text-sm mt-2">Overview of all certified providers and pending sign-offs.</p>
+    </div>
+    {CERTIFICATIONS.map(cert => {
+      const certifiedStudents = allStudents.filter(s => s.signoffs?.[cert.id]);
+      const readyStudents = allStudents.filter(s => {
+        const allMods = cert.modules.every(m => (s.theoreticalProgress || {})[m.id] === 'passed');
+        const allPrac = cert.practical.every(p => (s.practicalChecklist || {})[p.id] === true);
+        return allMods && allPrac && !s.signoffs?.[cert.id];
+      });
+      return (
+        <div key={cert.id} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden">
+          <div className="bg-[#231C1A] px-8 py-6 border-b border-stone-800 flex justify-between items-center">
+            <h3 className="font-bold text-white text-lg">{cert.title}</h3>
+            <div className="flex gap-3">
+              <span className="text-xs font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/40 px-3 py-1.5 rounded-lg">{certifiedStudents.length} Certified</span>
+              {readyStudents.length > 0 && <span className="text-xs font-bold text-[#d4b09e] bg-[#8B4828]/20 border border-[#8B4828]/40 px-3 py-1.5 rounded-lg">{readyStudents.length} Awaiting Sign-Off</span>}
+            </div>
+          </div>
+          <div className="p-6 space-y-3">
+            {readyStudents.length > 0 && (
+              <div className="mb-4">
+                <p className="text-[10px] font-bold text-[#d4b09e] uppercase tracking-widest mb-3">Ready for Sign-Off</p>
+                {readyStudents.map(s => (
+                  <div key={s.id} className="flex items-center justify-between bg-[#2a1810] border border-[#8B4828]/40 rounded-2xl p-4 mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[#8B4828] text-white flex items-center justify-center font-bold text-sm">{s.id.substring(0,2).toUpperCase()}</div>
+                      <span className="font-bold text-white text-sm">{s.id}</span>
+                    </div>
+                    <button onClick={() => { setSelectedStudentForSignoff(s); setAppState('signoff'); window.scrollTo(0,0); }} className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-4 py-2 rounded-lg font-bold text-xs transition-colors flex items-center gap-2">
+                      <Award className="w-3.5 h-3.5"/> Sign Off Now
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {certifiedStudents.length > 0 ? (
+              <div>
+                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-3">Certified Providers</p>
+                {certifiedStudents.map(s => (
+                  <div key={s.id} className="flex items-center justify-between bg-[#171311] border border-emerald-900/30 rounded-2xl p-4 mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-emerald-950 text-emerald-400 flex items-center justify-center font-bold text-sm">{s.id.substring(0,2).toUpperCase()}</div>
+                      <div>
+                        <span className="font-bold text-white text-sm block">{s.id}</span>
+                        <span className="text-[10px] text-stone-500">Certified {s.signoffs[cert.id]?.at ? new Date(s.signoffs[cert.id].at).toLocaleDateString() : ''} by {s.signoffs[cert.id]?.by}</span>
+                      </div>
+                    </div>
+                    <CheckCircle className="w-5 h-5 text-emerald-500"/>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-stone-500 text-sm text-center py-4">No certified providers yet for this track.</p>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+) : supervisorActiveTab === 'practical' ? (
+  <div className="flex flex-col gap-6">
+    <div className="bg-[#8B4828] rounded-3xl p-8 text-white shadow-xl">
+      <h2 className="text-3xl font-bold tracking-tight">Practical Tasks</h2>
+      <p className="text-[#e8d5cc] text-sm mt-2">Check off hands-on tasks as each provider completes them in person.</p>
+    </div>
+    {allStudents.length === 0 ? (
+      <div className="bg-[#171311] border border-stone-800 rounded-3xl p-16 text-center text-stone-500">No providers registered yet.</div>
+    ) : allStudents.map(student => (
+      <div key={student.id} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden">
+        <div className="bg-[#231C1A] px-8 py-5 border-b border-stone-800 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
+          <h3 className="font-bold text-white">{student.id}</h3>
+        </div>
+        <div className="p-6 space-y-6">
+          {CERTIFICATIONS.map(cert => {
+            const isCertSignedOff = !!student.signoffs?.[cert.id];
+            const checkedCount = cert.practical.filter(p => (student.practicalChecklist || {})[p.id] === true).length;
+            return (
+              <div key={cert.id}>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-xs font-bold text-[#d4b09e] uppercase tracking-widest">{cert.title}</p>
+                  <span className="text-[10px] text-stone-400 font-bold">{checkedCount}/{cert.practical.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {cert.practical.map(item => {
+                    const isChecked = (student.practicalChecklist || {})[item.id] === true;
+                    return (
+                      <label key={item.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${isCertSignedOff ? 'opacity-50 cursor-default' : 'cursor-pointer hover:bg-[#231C1A]'} ${isChecked ? 'border-[#8B4828]/50 bg-[#1a1210]' : 'border-stone-800'}`}>
+                        <input type="checkbox" className="w-4 h-4 mt-0.5 text-[#8B4828] bg-[#171311] rounded border-stone-700 focus:ring-[#8B4828]" checked={isChecked} onChange={() => handleTogglePractical(student.id, item.id, student.practicalChecklist || {}, isCertSignedOff)} disabled={isCertSignedOff}/>
+                        <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+
+) : (
+  <div className="bg-[#171311] rounded-3xl shadow-xl border border-stone-800 overflow-hidden">
+    <div className="px-8 py-6 border-b border-stone-800 bg-[#231C1A]">
+      <h2 className="font-bold text-white text-lg tracking-wide">Clinical Track: <span className="text-[#d4b09e]">{activeCert.title}</span></h2>
+    </div>
+    <div className="p-6 flex flex-col gap-4">
+      {allStudents.length === 0 ? (
+        <p className="text-stone-500 text-center py-8">No providers registered yet.</p>
+      ) : allStudents.map(student => {
+        const cPassed = activeCert.modules.filter(m => (student.theoreticalProgress || {})[m.id] === 'passed').length;
+        const cPrac = activeCert.practical.filter(p => (student.practicalChecklist || {})[p.id]).length;
+        const pct = Math.round(((cPassed + cPrac) / (activeCert.modules.length + activeCert.practical.length)) * 100) || 0;
+        const isSigned = !!student.signoffs?.[activeCertId];
+        return (
+          <div key={student.id} className="bg-[#231C1A] border border-stone-800 rounded-2xl p-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="w-10 h-10 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-sm border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
+              <div className="flex-1">
+                <p className="font-bold text-white text-sm mb-2">{student.id}</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-stone-800 h-1.5 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#8B4828] rounded-full transition-all" style={{ width: `${pct}%` }}></div>
+                  </div>
+                  <span className="text-xs text-stone-400 font-bold w-8">{pct}%</span>
+                </div>
+                <p className="text-[10px] text-stone-500 mt-1">{cPassed}/{activeCert.modules.length} modules · {cPrac}/{activeCert.practical.length} practicals</p>
+              </div>
+            </div>
+            {isSigned ? (
+              <span className="text-[10px] font-bold text-emerald-400 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1 rounded">Certified</span>
+            ) : (
+              <button onClick={() => { setExpandedStudentId(student.id); setSupervisorActiveTab('dashboard'); window.scrollTo(0,0); }} className="text-xs font-bold text-stone-400 hover:text-white border border-stone-700 hover:border-stone-500 px-3 py-1.5 rounded-lg transition-colors">View Profile</button>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
         </div>
       </div>
     );
