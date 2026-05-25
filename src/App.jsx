@@ -2990,6 +2990,8 @@ export default function App() {
           {CERTIFICATIONS.map(cert => {
             const isCertSignedOff = !!student.signoffs?.[cert.id];
             const checkedCount = cert.practical.filter(p => (student.practicalChecklist || {})[p.id] === true).length;
+            const allPracDone = checkedCount === cert.practical.length;
+            const allModsDone = cert.modules.every(m => (student.theoreticalProgress || {})[m.id] === 'passed');
             return (
               <div key={cert.id}>
                 <div className="flex justify-between items-center mb-3">
@@ -3007,6 +3009,30 @@ export default function App() {
                     );
                   })}
                 </div>
+                {!isCertSignedOff && allPracDone && allModsDone && (
+                  <div className="mt-4 pt-4 border-t border-stone-800 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-bold text-emerald-400">All requirements met for {cert.title}</p>
+                      <p className="text-xs text-stone-500 mt-1">Theory complete + all practicals checked</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setActiveCertId(cert.id);
+                        setSelectedStudentForSignoff(student);
+                        setAppState('signoff');
+                        window.scrollTo(0,0);
+                      }}
+                      className="bg-emerald-700 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center gap-2 shrink-0 animate-pulse"
+                    >
+                      <Award className="w-4 h-4"/> Generate Certificate
+                    </button>
+                  </div>
+                )}
+                {!isCertSignedOff && allPracDone && !allModsDone && (
+                  <div className="mt-4 pt-4 border-t border-stone-800">
+                    <p className="text-xs text-stone-500 italic">Practicals complete — waiting on employee to finish theory modules.</p>
+                  </div>
+                )}
               </div>
             );
           })}
