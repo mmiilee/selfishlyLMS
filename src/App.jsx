@@ -3390,10 +3390,9 @@ export default function App() {
           certTitle={activeCert.title}
           supervisorName={currentSignoff?.by || '—'}
           signoffDate={currentSignoff?.at ? new Date(currentSignoff.at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
-        />
+/>
       </div>
     );
-  };
   };
 
   return (
@@ -3444,9 +3443,10 @@ export default function App() {
       {appState === 'quiz' && renderQuiz()}
       {appState === 'supervisor-dash' && renderSupervisorDashboard()}
       {appState === 'signoff' && renderSupervisorSignoff()}
-      {appState === 'certificate' && renderCertificate()}
+ {appState === 'certificate' && renderCertificate()}
       
       {/* Global Modals */}
       <ReadingModal />
     </div>
-      )  
+  );
+}
