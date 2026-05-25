@@ -2376,10 +2376,6 @@ export default function App() {
                   <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">Clinical Training<br/>Overview</h1>
                   <p className="text-stone-400 text-sm leading-relaxed max-w-xs">Real-time provider certification and practical readiness across both tracks.</p>
                 </div>
-                <div className="relative z-10 text-right shrink-0 pr-4 sm:pr-8">
-                <span className="text-5xl sm:text-6xl font-bold text-white block mb-1">{totalModulesPassed}</span>
-                <span className="text-[#8B4828] text-[10px] uppercase font-bold tracking-widest block">Total Modules<br/>Passed</span>
-                </div>
               </div>
 
               {/* 4 Stats Grid */}
