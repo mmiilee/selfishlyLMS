@@ -2740,7 +2740,7 @@ export default function App() {
                 const totalAttempts = Object.values(student.quizPerformance || {}).reduce((a, b) => a + (b.attempts || 0), 0);
                 const totalMistakes = Object.values(student.quizPerformance || {}).reduce((a, b) => a + Object.values(b.mistakes || {}).reduce((x, y) => x + y, 0), 0);
                 return (
-                  <div key={student.id} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden shadow-lg">
+<div key={student.id} id={`provider-${student.id}`} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden shadow-lg">
                     <div className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-lg border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
@@ -3115,12 +3115,11 @@ export default function App() {
               <span className="text-[10px] font-bold text-emerald-400 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1 rounded">Certified</span>
             ) : (
               <button onClick={() => { 
-                setExpandedStudentId(student.id); 
-                setSupervisorActiveTab('dashboard'); 
+                setSupervisorActiveTab('providers');
                 setTimeout(() => {
-                  const el = document.getElementById(`student-row-${student.id}`);
+                  const el = document.getElementById(`provider-${student.id}`);
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
+                }, 150);
               }} className="text-xs font-bold text-stone-400 hover:text-white border border-stone-700 hover:border-stone-500 px-3 py-1.5 rounded-lg transition-colors">View Profile</button>
             )}
           </div>
