@@ -2350,13 +2350,13 @@ export default function App() {
           
         {supervisorActiveTab === 'dashboard' ? (
             <>
-              {studentStats.some(s => s.status === 'THEORY COMPLETE' || s.status === 'AWAITING REVIEW') && (
+              {studentStats.some(s => s.status === 'THEORY COMPLETE ✓' || s.status === 'AWAITING REVIEW') && (
                 <div className="bg-[#2a1810] border border-[#8B4828] rounded-2xl p-4 flex items-start gap-4 mb-2">
                   <AlertOctagon className="w-5 h-5 text-[#d4b09e] shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-bold text-white mb-1">Action Required</p>
                     <div className="flex flex-wrap gap-2">
-                      {studentStats.filter(s => s.status === 'THEORY COMPLETE' || s.status === 'AWAITING REVIEW').map(s => (
+                      {studentStats.filter(s => s.status === 'THEORY COMPLETE ✓' || s.status === 'AWAITING REVIEW').map(s => (
                         <span key={s.id} className="text-xs text-[#d4b09e] bg-[#8B4828]/20 border border-[#8B4828]/40 px-3 py-1 rounded-full font-semibold">
                           {s.id} — {s.status === 'THEORY COMPLETE' ? 'Theory done, needs practical sign-off' : 'Ready for full certification'}
                         </span>
@@ -2584,9 +2584,19 @@ export default function App() {
   }
 
   if (allModsDone && allPracDone) {
+    const readyCert = CERTIFICATIONS.find(c =>
+      c.modules.every(m => (student.theoreticalProgress || {})[m.id] === 'passed') &&
+      c.practical.every(p => (student.practicalChecklist || {})[p.id] === true) &&
+      !student.signoffs?.[c.id]
+    );
     return (
       <button
-        onClick={() => { setSelectedStudentForSignoff(student); setAppState('signoff'); window.scrollTo(0,0); }}
+        onClick={() => { 
+          if (readyCert) setActiveCertId(readyCert.id);
+          setSelectedStudentForSignoff(student); 
+          setAppState('signoff'); 
+          window.scrollTo(0,0); 
+        }}
         className="bg-[#8B4828] hover:bg-[#a85a36] text-white px-5 py-2 rounded-lg font-bold text-xs transition-colors flex items-center gap-2 animate-pulse"
       >
         <Award className="w-3.5 h-3.5" /> Ready — Sign Off Now
@@ -3160,48 +3170,9 @@ export default function App() {
           </div>
         </div>
       </div>
-    );
+   );
   };
-      <div className="max-w-2xl mx-auto space-y-6 mt-12 px-4">
-        <button onClick={() => setAppState('supervisor-dash')} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors px-2">
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </button>
-
-        <div className="bg-[#231C1A] rounded-3xl shadow-2xl border border-stone-800 p-10 text-center space-y-8">
-          <div className="mx-auto w-24 h-24 bg-[#171311] rounded-full flex items-center justify-center border border-stone-800 shadow-inner">
-            <FileSignature className="w-10 h-10 text-[#d4b09e]" />
-          </div>
-          
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Official Certification Sign-off</h1>
-            <p className="text-stone-400 mt-4 leading-relaxed text-lg">
-              <span className="font-bold text-white">{selectedStudentForSignoff.id}</span> has completed all requirements for <span className="font-bold text-white">{activeCert.title}</span>.
-            </p>
-          </div>
-
-          <div className="bg-[#171311] border border-stone-800 rounded-2xl p-6 text-left space-y-4 shadow-inner">
-            <h3 className="font-bold text-[#d4b09e] border-b border-stone-800 pb-3 uppercase tracking-widest text-xs">Requirements Met</h3>
-            <ul className="space-y-4 text-sm text-stone-300 font-medium pt-2">
-              <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-emerald-500"/> All Theoretical Modules Passed</li>
-              <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-emerald-500"/> All Hands-on Practical Items Checked</li>
-            </ul>
-          </div>
-
-          <div className="pt-8 border-t border-stone-800">
-            <p className="text-sm text-stone-400 mb-8 italic leading-relaxed px-4">
-              "By signing off, I verify that I have reviewed this employee's knowledge and they are officially cleared for practical, unsupervised application at SELFishly Aesthetics & Wellness."
-            </p>
-            <button
-              onClick={handleSupervisorSignoff}
-              className="w-full flex justify-center items-center gap-3 bg-[#8B4828] hover:bg-[#a85a36] text-white px-6 py-4 rounded-xl font-bold transition-colors shadow-lg text-lg"
-            >
-              <UserCheck className="w-6 h-6" /> Execute Clinical Supervisor Sign Off
-            </button>
-          </div>
-        </div>
-      </div>
-  };
-
+   
   const renderCertificate = () => {
     return (
       <div className="max-w-4xl mx-auto space-y-6 mt-8">
@@ -3300,4 +3271,4 @@ export default function App() {
       {/* Global Modals */}
       <ReadingModal />
     </div>
-  );
+      )}    
