@@ -3394,46 +3394,6 @@ export default function App() {
       </div>
     );
   };
-      <div className="max-w-4xl mx-auto space-y-6 mt-8">
-        <div className="flex justify-between items-center print:hidden px-4">
-          <button onClick={() => {
-             if (currentUser.role === 'supervisor') setAppState('supervisor-dash');
-             else setAppState('student-dash');
-          }} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-          </button>
-          <button onClick={() => window.print()} className="bg-white hover:bg-stone-200 text-black px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm">
-            <Printer className="w-4 h-4"/> Print Certificate
-          </button>
-        </div>
-        
-        <div className="bg-[#FAF9F6] p-12 md:p-20 border-[16px] border-[#2C1A14] rounded-3xl shadow-2xl text-center print:shadow-none print:m-0 print:border-8 print:rounded-none">
-          <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center mb-8 border border-stone-200 shadow-sm">
-            <Award className="w-12 h-12 text-[#8B4828]" />
-          </div>
-          <h1 className="text-4xl md:text-6xl font-serif text-[#2C1A14] mb-3">Certificate of Completion</h1>
-          <p className="text-lg md:text-xl text-[#8B4828] tracking-widest uppercase mb-16 font-bold">{activeCert.title}</p>
-          
-          <p className="text-lg text-stone-600 mb-4 font-serif italic">This certifies that</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-8 border-b-2 border-stone-200 inline-block px-16 pb-3">{currentUser?.name}</h2>
-          <p className="text-lg text-stone-700 max-w-2xl mx-auto leading-relaxed mb-20">
-            has successfully completed all theoretical coursework, device operation protocol, safety training, and hands-on practical requirements necessary to earn certification for {activeCert.title} at SELFishly Aesthetics & Wellness.
-          </p>
-
-          <div className="flex justify-around items-end pt-12 border-t border-stone-200">
-            <div className="text-center">
-              <p className="text-xl font-bold text-black font-serif italic">{currentSignoff?.by}</p>
-              <div className="w-56 h-px bg-stone-300 my-3 mx-auto"></div>
-              <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Clinical Supervisor</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-black">{currentSignoff?.at ? new Date(currentSignoff.at).toLocaleDateString() : 'N/A'}</p>
-              <div className="w-56 h-px bg-stone-300 my-3 mx-auto"></div>
-              <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">Date of Certification</p>
-            </div>
-          </div>
-        </div>
-      </div>
   };
 
   return (
