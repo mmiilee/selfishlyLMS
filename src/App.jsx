@@ -2126,8 +2126,8 @@ export default function App() {
                         btnClass = "bg-stone-800 border-stone-700 text-stone-500 opacity-80";
                         radioClass = "border-stone-500 bg-stone-500";
                       } else if (isTheCorrectAnswer) {
-                        btnClass = "bg-[#231C1A] border-[#8B4828] text-[#8B4828] border-dashed";
-                        radioClass = "border-[#8B4828]";
+                        btnClass = "bg-[#171311] border-stone-800 text-stone-600 opacity-50";
+                        radioClass = "border-stone-800";
                       } else {
                         btnClass = "bg-[#171311] border-stone-800 text-stone-600 opacity-50";
                         radioClass = "border-stone-800";
@@ -2383,16 +2383,11 @@ export default function App() {
               </div>
 
               {/* 4 Stats Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="bg-[#171311] border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between">
                   <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-4">Providers Enrolled</p>
                   <span className="text-3xl font-bold text-white mb-3">{totalEnrolled}</span>
                   <p className="text-stone-500 text-xs">— 3 active tracks</p>
-                </div>
-                <div className="bg-[#171311] border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between">
-                  <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-4">Modules Passed</p>
-                  <span className="text-3xl font-bold text-white mb-3">{totalModulesPassed}</span>
-                  <p className="text-emerald-500 text-xs flex items-center gap-1"><ArrowUpRight className="w-3 h-3"/> {recentActivities.filter(a => a.type === 'success').length} recently</p>
                 </div>
                 <div onClick={() => setSupervisorActiveTab('certifications')} className="bg-[#171311] border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between cursor-pointer hover:border-[#8B4828] hover:bg-[#1a1210] transition-all group">
                   <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-4">Ready for Sign-off</p>
@@ -2407,51 +2402,7 @@ export default function App() {
               </div>
 
               {/* 3 Columns Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* Track Completion Card */}
-                <div className="bg-[#171311] border border-stone-800 rounded-3xl p-8 shadow-md">
-                <p className="text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-8">Theory Progress by Track</p>
-                  <div className="space-y-8">
-                    <div>
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-bold text-white leading-none">LHR —<br/>SplendorX</span>
-                        <span className="text-sm font-bold text-stone-400">{avgLHR}%</span>
-                      </div>
-                      <div className="w-full bg-[#231C1A] h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#8B4828] rounded-full" style={{ width: `${avgLHR}%` }}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-bold text-white leading-none">Tattoo removal<br/>(M22)</span>
-                        <span className="text-sm font-bold text-stone-400">{avgTattoo}%</span>
-                      </div>
-                      <div className="w-full bg-[#231C1A] h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#d4b09e] rounded-full" style={{ width: `${avgTattoo}%` }}></div>
-                      </div>
-                    </div>
-                    <div className="w-full h-px bg-stone-800 my-4"></div>
-                    <div>
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-bold text-stone-300">Practical sign-offs</span>
-                        <span className="text-sm font-bold text-stone-400">{avgPractical}%</span>
-                      </div>
-                      <div className="w-full bg-[#231C1A] h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${avgPractical}%` }}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-bold text-stone-300">Quiz accuracy</span>
-                        <span className="text-sm font-bold text-stone-400">91%</span>
-                      </div>
-                      <div className="w-full bg-[#231C1A] h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `91%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Real-time Activity Card */}
                 <div className="bg-[#171311] border border-stone-800 rounded-3xl p-8 shadow-md">
