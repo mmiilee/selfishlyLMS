@@ -2234,10 +2234,14 @@ export default function App() {
       
       const score = totalReqs === 0 ? 0 : Math.round(((totalPassed + totalPrac) / totalReqs) * 100);
       
+      const theoryComplete = CERTIFICATIONS.some(c =>
+        c.modules.every(m => (student.theoreticalProgress || {})[m.id] === 'passed') && !student.signoffs?.[c.id]
+      );
+      
       let status = 'JUST ENROLLED';
       if (isCertified) status = 'CERTIFIED';
       else if (isReady) status = 'AWAITING REVIEW';
-      else if (CERTIFICATIONS.some(c => c.modules.every(m => (student.theoreticalProgress || {})[m.id] === 'passed') && !student.signoffs?.[c.id])) status = 'THEORY COMPLETE';
+      else if (theoryComplete) status = 'THEORY COMPLETE ✓';
       else if (score > 0) status = 'IN PROGRESS';
 
       // Gather track names for the roster display
@@ -2335,8 +2339,8 @@ export default function App() {
           <div>
             <p className="text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-3 pl-3">System</p>
             <div className="flex flex-col gap-2">
-              <button className="flex items-center gap-3 w-full p-3 rounded-xl font-bold text-stone-400 hover:text-white transition-all"><Settings className="w-4 h-4"/> Settings</button>
-              <button onClick={handleLogout} className="flex items-center gap-3 w-full p-3 rounded-xl font-bold text-stone-400 hover:text-white transition-all"><LogOut className="w-4 h-4"/> Log out</button>
+            <button onClick={() => { setSupervisorActiveTab('certifications'); setExpandedStudentId(null); }} className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${supervisorActiveTab === 'certifications' ? 'bg-[#231C1A] text-[#d4b09e]' : 'text-stone-400 hover:text-white'}`}><Award className="w-4 h-4"/> Certifications</button>
+            <button onClick={() => { setSupervisorActiveTab('practical'); setExpandedStudentId(null); }} className={`flex items-center gap-3 w-full p-3 rounded-xl font-bold transition-all ${supervisorActiveTab === 'practical' ? 'bg-[#231C1A] text-[#d4b09e]' : 'text-stone-400 hover:text-white'}`}><CheckSquare className="w-4 h-4"/> Practical tasks</button>
             </div>
           </div>
         </div>
@@ -2514,6 +2518,9 @@ export default function App() {
   badgeClasses = "text-white border-[#8B4828] bg-[#8B4828]";
   badgeIcon = <AlertOctagon className="w-3.5 h-3.5" />;
 } else if (student.status === 'THEORY COMPLETE') {
+  badgeClasses = "text-purple-300 border-purple-800 bg-purple-950/30";
+  badgeIcon = <Award className="w-3.5 h-3.5" />;
+} else if (student.status === 'THEORY COMPLETE ✓') {
   badgeClasses = "text-purple-300 border-purple-800 bg-purple-950/30";
   badgeIcon = <Award className="w-3.5 h-3.5" />;
 } else if (student.status === 'IN PROGRESS') {
@@ -3040,7 +3047,121 @@ export default function App() {
 
   const renderSupervisorSignoff = () => {
     if (!selectedStudentForSignoff) return null;
+    const signoffCommentKey = `signoff_${selectedStudentForSignoff.id}`;
+    const signoffComment = supervisorDrafts[signoffCommentKey] || '';
+
     return (
+      <div className="max-w-3xl mx-auto space-y-6 mt-12 px-4 pb-16">
+        <button onClick={() => setAppState('supervisor-dash')} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors px-2">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </button>
+
+        <div className="bg-[#231C1A] rounded-3xl shadow-2xl border border-stone-800 overflow-hidden">
+          {/* Header */}
+          <div className="bg-[#171311] border-b border-stone-800 p-8 flex items-center gap-6">
+            <div className="w-16 h-16 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-2xl border border-stone-700">
+              {selectedStudentForSignoff.id.substring(0,2).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-[#8B4828] uppercase tracking-widest mb-1">Certification Sign-Off</p>
+              <h1 className="text-2xl font-bold text-white">{selectedStudentForSignoff.id}</h1>
+              <p className="text-stone-400 text-sm mt-1">{activeCert.title}</p>
+            </div>
+          </div>
+
+          <div className="p-8 space-y-8">
+            {/* Requirements checklist per cert */}
+            {CERTIFICATIONS.map(cert => {
+              const allModsPassed = cert.modules.every(m => (selectedStudentForSignoff.theoreticalProgress || {})[m.id] === 'passed');
+              const isCertSignedOff = !!selectedStudentForSignoff.signoffs?.[cert.id];
+              const checkedPrac = cert.practical.filter(p => (selectedStudentForSignoff.practicalChecklist || {})[p.id]).length;
+
+              return (
+                <div key={cert.id} className="bg-[#171311] border border-stone-800 rounded-2xl overflow-hidden">
+                  <div className="px-6 py-4 border-b border-stone-800 flex items-center justify-between">
+                    <h3 className="font-bold text-white">{cert.title}</h3>
+                    {isCertSignedOff && <span className="text-[10px] font-bold text-emerald-400 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1 rounded">Certified</span>}
+                  </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* Theory status */}
+                    <div className="flex items-center gap-3">
+                      {allModsPassed
+                        ? <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0"/>
+                        : <Circle className="w-5 h-5 text-stone-600 shrink-0"/>}
+                      <div>
+                        <p className="text-sm font-bold text-white">Theoretical Modules</p>
+                        <p className="text-xs text-stone-500">{cert.modules.filter(m => (selectedStudentForSignoff.theoreticalProgress || {})[m.id] === 'passed').length}/{cert.modules.length} passed</p>
+                      </div>
+                    </div>
+
+                    {/* Practical checklist */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-bold text-[#d4b09e] uppercase tracking-widest">Practical Tasks</p>
+                        <span className="text-[10px] text-stone-400 font-bold">{checkedPrac}/{cert.practical.length}</span>
+                      </div>
+                      <div className="space-y-2">
+                        {cert.practical.map(item => {
+                          const isChecked = (selectedStudentForSignoff.practicalChecklist || {})[item.id] === true;
+                          return (
+                            <label key={item.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer hover:bg-[#231C1A] ${isChecked ? 'border-[#8B4828]/50 bg-[#1a1210]' : 'border-stone-800'}`}>
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 mt-0.5 text-[#8B4828] bg-[#171311] rounded border-stone-700 focus:ring-[#8B4828]"
+                                checked={isChecked}
+                                onChange={() => handleTogglePractical(selectedStudentForSignoff.id, item.id, selectedStudentForSignoff.practicalChecklist || {}, false)}
+                              />
+                              <span className={`text-xs leading-relaxed ${isChecked ? 'text-white font-semibold' : 'text-stone-400'}`}>{item.label}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Supervisor sign-off comment */}
+            <div className="bg-[#171311] border border-stone-800 rounded-2xl p-6">
+              <h3 className="font-bold text-white mb-1 flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-[#8B4828]"/> Supervisor Sign-Off Notes
+              </h3>
+              <p className="text-xs text-stone-500 mb-4">These notes will be attached to this employee's certification record and visible to them.</p>
+              <textarea
+                value={signoffComment}
+                onChange={(e) => setSupervisorDrafts(prev => ({ ...prev, [signoffCommentKey]: e.target.value }))}
+                placeholder="Add any observations, conditions, or congratulatory notes for this employee..."
+                className="w-full bg-[#231C1A] text-white placeholder-stone-600 border border-stone-800 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B4828] transition-all min-h-[120px] resize-none"
+              />
+            </div>
+
+            {/* Sign off button */}
+            <div className="border-t border-stone-800 pt-6">
+              <p className="text-xs text-stone-500 italic text-center mb-6 leading-relaxed px-4">
+                "By signing off, I verify that I have reviewed this employee's knowledge and they are officially cleared for practical, unsupervised application at SELFishly Aesthetics & Wellness."
+              </p>
+              <button
+                onClick={async () => {
+                  if (signoffComment.trim() && selectedStudentForSignoff) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'students', selectedStudentForSignoff.id);
+                    try {
+                      await updateDoc(docRef, { signoffNotes: signoffComment });
+                    } catch(e) { console.error(e); }
+                  }
+                  handleSupervisorSignoff();
+                }}
+                className="w-full flex justify-center items-center gap-3 bg-[#8B4828] hover:bg-[#a85a36] text-white px-6 py-4 rounded-xl font-bold transition-colors shadow-lg text-lg"
+              >
+                <UserCheck className="w-6 h-6" /> Execute Clinical Supervisor Sign Off
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
       <div className="max-w-2xl mx-auto space-y-6 mt-12 px-4">
         <button onClick={() => setAppState('supervisor-dash')} className="flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-white transition-colors px-2">
           <ArrowLeft className="w-4 h-4" /> Back to Dashboard
