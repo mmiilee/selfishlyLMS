@@ -2741,7 +2741,9 @@ export default function App() {
                 const totalMistakes = Object.values(student.quizPerformance || {}).reduce((a, b) => a + Object.values(b.mistakes || {}).reduce((x, y) => x + y, 0), 0);
                 return (
 <div key={student.id} id={`provider-${student.id}`} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden shadow-lg">
-                    <div className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800">
+  <div 
+    onClick={() => setExpandedStudentId(expandedStudentId === student.id ? null : student.id)}
+    className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800 cursor-pointer hover:bg-[#2a1f1c] transition-colors">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-lg border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
                         <div>
@@ -2879,8 +2881,8 @@ export default function App() {
       const totalMistakes = Object.values(student.quizPerformance || {}).reduce((a, b) => a + Object.values(b.mistakes || {}).reduce((x, y) => x + y, 0), 0);
       return (
         <div key={student.id} className="bg-[#171311] border border-stone-800 rounded-3xl overflow-hidden shadow-lg">
-          <div className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800">
-            <div className="flex items-center gap-4">
+<div onClick={() => setExpandedStudentId(expandedStudentId === student.id ? null : student.id)} className="bg-[#231C1A] px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-800 cursor-pointer hover:bg-[#2a1f1c] transition-colors">
+      <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[#302624] text-[#d4b09e] flex items-center justify-center font-bold text-lg border border-stone-700">{student.id.substring(0,2).toUpperCase()}</div>
               <div>
                 <h3 className="font-bold text-white text-lg">{student.id}</h3>
@@ -2892,8 +2894,8 @@ export default function App() {
               <div><p className="text-xl font-bold text-white">{totalAttempts}</p><p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Quiz Attempts</p></div>
               <div><p className="text-xl font-bold text-rose-400">{totalMistakes}</p><p className="text-[9px] text-stone-500 uppercase tracking-wider mt-1">Total Mistakes</p></div>
             </div>
-          </div>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+    {expandedStudentId === student.id && <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             {CERTIFICATIONS.flatMap(cert => cert.modules).map(mod => {
               const isPassed = (student.theoreticalProgress || {})[mod.id] === 'passed';
               const stats = (student.quizPerformance || {})[mod.id] || { attempts: 0, mistakes: {} };
@@ -2944,7 +2946,7 @@ export default function App() {
                 </div>
               );
             })}
-          </div>
+          </div>}
         </div>
       );
     })}
